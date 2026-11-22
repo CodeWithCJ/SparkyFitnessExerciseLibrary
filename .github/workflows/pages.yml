@@ -38,6 +38,9 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: docs/pnpm-lock.yaml
+      - name: Build catalog
+        # Always from the exercise folders, so the site never waits for the Sync catalog commit.
+        run: node scripts/build.mjs
       - name: Build site
         working-directory: docs
         run: |

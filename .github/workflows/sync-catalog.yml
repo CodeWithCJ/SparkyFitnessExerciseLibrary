@@ -1,0 +1,67 @@
+name: Sync catalog
+
+# dist/exercises.json and locales/en/exercises.json are generated from the exercise folders.
+# Contributors only change the folders. After a merge this rebuilds the two files and commits them
+# to main, so nobody has to run `pnpm build`, including people who edit on github.com.
+#
+# The commit is made by the github-actions bot, so the main branch ruleset must let that app
+# bypass the pull request requirement. Commits made with GITHUB_TOKEN do not start other
+# workflows, which also means this cannot loop.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'exercises/**'
+      - 'taxonomy/**'
+      - 'schema/**'
+      - 'scripts/build.mjs'
+      - 'scripts/lib/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-catalog
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Rebuild and commit the catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # push the rebuilt files
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Rebuild and commit
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            node scripts/build.mjs
+            if git diff --quiet -- dist locales; then
+              echo "The catalog is already up to date."
+              exit 0
+            fi
+            git add dist locales
+            git commit -m "chore: rebuild catalog"
+            if git push origin HEAD:main; then
+              echo "Pushed the rebuilt catalog."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt): main moved. Starting again from the latest main."
+            git fetch origin main
+            git checkout -B work origin/main
+          done
+
+          echo "::error::Could not push the rebuilt catalog. Check that the github-actions app can bypass the main branch ruleset."
+          exit 1
