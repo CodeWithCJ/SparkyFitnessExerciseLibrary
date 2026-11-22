@@ -1,0 +1,289 @@
+name: PR Checks
+
+# Adds back the mandatory template checklist when a contributor deletes it, labels the PR and
+# reports what still needs doing. Rules live in .github/scripts/pr-policy.cjs.
+#
+# pull_request_target runs this from the base branch with write access, so it must never check
+# out or execute code from the pull request. It only reads the PR's title, body and file list.
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate & Label
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out policy rules
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Validate and label PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const policy = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/pr-policy.cjs`);
+
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('No pull request in this event (manual run); nothing to check.');
+              return;
+            }
+            const canWrite = context.eventName === 'pull_request_target';
+            const title = pr.title;
+            const body = pr.body || '';
+            const isDraft = pr.draft === true;
+
+            // Owner, bots and automation branches are not held to the contributor checklist.
+            const exemption = policy.getExemption(pr);
+            const exempt = exemption.exempt;
+            const isAutomation = policy.isAutomation(pr);
+
+            // Paginate: the unpaginated call stops at 30 files and would miss media on big PRs.
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+            const changedFiles = files.map(f => f.filename);
+            const mediaFiles = policy.getMediaFiles(files);
+            const nonEnLocaleFiles = policy.getNonEnglishLocaleFiles(changedFiles);
+            const areas = policy.getChangeAreas(changedFiles);
+
+            const ai = policy.getAiAssistance(body);
+            const checked = item => policy.isChecked(body, item);
+            const present = item => policy.isPresent(body, item);
+
+            // ---- Labels (add-only: a maintainer clears needs-extra-review once satisfied) ----
+            const labels = new Set();
+            if (/^fix(\(.+\))?!?:/i.test(title)) labels.add('bug');
+            if (/^feat(\(.+\))?!?:/i.test(title)) labels.add('enhancement');
+            if (/^docs(\(.+\))?!?:/i.test(title)) labels.add('documentation');
+            if (/^refactor(\(.+\))?!?:/i.test(title)) labels.add('refactor');
+            if (/^security(\(.+\))?!?:/i.test(title)) labels.add('security');
+            if (policy.isPrTypeChecked(body, policy.PR_TYPE_OPTIONS[3])) labels.add('documentation');
+            if (areas.exercises) labels.add('exercise-data');
+            if (mediaFiles.length > 0) labels.add('media');
+            if (areas.tooling) labels.add('tooling');
+            if (areas.site) labels.add('site');
+            if (ai.needsExtraReview && !exempt) labels.add(policy.NEEDS_EXTRA_REVIEW_LABEL);
+
+            if (canWrite && labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: [...labels],
+              });
+            }
+
+            // ---- Add back deleted template items ----
+            // Contributors often replace the whole template with their own summary. Add back only
+            // what this PR needs, appended after whatever they wrote so nothing of theirs is lost.
+            const mediaRequired = mediaFiles.length > 0 && !exempt;
+            const checklistItems = [
+              { label: policy.LICENSE_ITEM, required: true, text: policy.LICENSE_ITEM_TEXT },
+              { label: policy.MEDIA_ITEM, required: mediaRequired, text: policy.MEDIA_ITEM_TEXT },
+            ];
+            const missingItems = checklistItems.filter(i => i.required && !present(i.label));
+            const aiMissingOptions = policy.AI_ASSISTANCE_OPTIONS.filter(o => !ai.present.includes(o));
+            const typeMissingOptions = policy.getMissingPrTypes(body);
+
+            // GitHub does not re-trigger workflows for edits made with GITHUB_TOKEN, so our own
+            // edit below cannot loop; the sender check is belt and braces.
+            const senderIsSelf = context.payload.sender?.login === 'github-actions[bot]';
+            const somethingMissing =
+              missingItems.length > 0 || aiMissingOptions.length > 0 || typeMissingOptions.length > 0;
+
+            if (canWrite && somethingMissing && !exempt && !senderIsSelf) {
+              const lines = [
+                '<!-- restored-checklist -->',
+                '---',
+                '## ✅ Required Checklist (restored automatically)',
+                '',
+                '> The mandatory checklist from our PR template is missing from this description, so it',
+                '> has been added back below. **Please tick each box and do not delete this section.**',
+                '> Edit the description in place; no new commit is needed.',
+                '',
+                ...missingItems.map(i => `- [ ] ${i.text}`),
+              ];
+              if (typeMissingOptions.length > 0) {
+                lines.push('', '**PR Type (pick the one that fits):**', '');
+                lines.push(...typeMissingOptions.map(o => `- [ ] ${o.text}`));
+              }
+              if (aiMissingOptions.length > 0) {
+                lines.push('', '**AI assistance (pick one):**', '');
+                lines.push(...aiMissingOptions.map(o => `- [ ] ${o.text}`));
+              }
+              const added = [
+                ...missingItems.map(i => i.label.replace(/^\[MANDATORY[^\]]*\]\s*/, '')),
+                ...(typeMissingOptions.length > 0 ? ['PR Type'] : []),
+                ...(aiMissingOptions.length > 0 ? ['AI assistance'] : []),
+              ];
+              lines.push('', `_Added back: ${added.join(', ')}._`);
+
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                body: `${body.trimEnd()}\n\n${lines.join('\n')}\n`,
+              });
+              core.notice(`Restored ${added.length} missing checklist group(s) to the PR description.`);
+            }
+
+            // ---- Validation ----
+            const errors = [];
+            const warnings = [];
+
+            const licenseAgreed = checked(policy.LICENSE_ITEM);
+            if (!licenseAgreed && !exempt) {
+              errors.push('**[MANDATORY]** Check the "Integrity & License" checkbox.');
+            }
+
+            if (mediaRequired && !checked(policy.MEDIA_ITEM)) {
+              errors.push(
+                '**[MANDATORY for media]** This PR adds or changes images or videos. Check the "Rights & consent" checkbox.'
+              );
+            }
+
+            if (!isAutomation && !policy.hasValidTitlePrefix(title)) {
+              errors.push(
+                '**[MANDATORY]** Start the PR title with a type prefix such as `feat:`, `fix:`, `docs:`, ' +
+                  '`refactor:`, `security:`, `perf:`, `test:` or `chore:` (optionally scoped, e.g. `fix(site): ...`). ' +
+                  'Labels and the changelog are built from it.'
+              );
+            }
+
+            if (!exempt) {
+              if (ai.selected.length === 0) {
+                errors.push(
+                  '**[MANDATORY]** Pick one "AI assistance" option. It helps maintainers choose review depth and is not a judgment on AI use.'
+                );
+              } else if (ai.selected.length > 1) {
+                errors.push('**[MANDATORY]** Pick only one "AI assistance" option.');
+              }
+            }
+
+            if (!isAutomation && nonEnLocaleFiles.length > 0) {
+              errors.push(
+                '**[MANDATORY]** Only the `en` translation files may be modified. ' +
+                  'Every other language is owned by Weblate and arrives through its sync. ' +
+                  `Remove changes to: ${nonEnLocaleFiles.slice(0, 10).map(f => '`' + f + '`').join(', ')}` +
+                  `${nonEnLocaleFiles.length > 10 ? ` and ${nonEnLocaleFiles.length - 10} more` : ''}.`
+              );
+            }
+
+            const anyTypeChecked = policy.PR_TYPE_OPTIONS.some(o => policy.isPrTypeChecked(body, o));
+            if (!anyTypeChecked) {
+              warnings.push('Please select a PR type (New or changed exercises, Media, Tooling / schema or Documentation).');
+            }
+
+            const descriptionSection = body.split('## Description')[1]?.split(/^##\s/m)[0] ?? '';
+            if (!body.includes('## Description') || descriptionSection.trim().length < 20) {
+              warnings.push('Please provide a meaningful description of your changes.');
+            }
+
+            // Our own automation is not held to the contributor checklist.
+            if (isAutomation && (errors.length > 0 || warnings.length > 0)) {
+              core.info(
+                `Automation PR (${exemption.reason}): suppressing ${errors.length} error(s) and ${warnings.length} warning(s).`
+              );
+              errors.length = 0;
+              warnings.length = 0;
+            }
+
+            // ---- Summary ----
+            let message = '## PR Validation Results\n\n';
+            const checklistIncomplete = !exempt && (!licenseAgreed || (mediaRequired && !checked(policy.MEDIA_ITEM)));
+            if (checklistIncomplete) {
+              message +=
+                '> [!NOTE]\n' +
+                '> **Reminder:** to review and accept this PR we need the mandatory checkboxes in the description ticked ' +
+                '(Integrity & License' + (mediaRequired ? ', Rights & consent' : '') + '). ' +
+                (canWrite
+                  ? 'If any were removed, they have been added back to the bottom of your description. Just tick them and this check will pass.\n\n'
+                  : 'Restore any missing checkboxes from the PR template and tick them in the description.\n\n');
+            } else if (isAutomation) {
+              message += `> [!NOTE]\n> Automation PR (${exemption.reason}). Contributor checklist not applied.\n\n`;
+            } else if (exempt) {
+              message += `> [!NOTE]\n> Checklist boxes skipped: ${exemption.reason}.\n\n`;
+            }
+
+            message += '### Change Detection\n';
+            if (areas.exercises) message += '- 🏋️ Exercise data, translations or `dist` changed\n';
+            if (mediaFiles.length) message += `- 🎬 ${mediaFiles.length} image/video file(s) added or changed\n`;
+            if (areas.tooling) message += '- 🛠️ Scripts, schema, taxonomy or workflows changed\n';
+            if (areas.site) message += '- 🌐 Browse site (`docs/`) changed\n';
+            if (nonEnLocaleFiles.length) message += `- ⚠️ ${nonEnLocaleFiles.length} non-English locale file(s) modified\n`;
+            if (!areas.exercises && !mediaFiles.length && !areas.tooling && !areas.site) {
+              message += '- ℹ️ No tracked directory changes detected\n';
+            }
+            message += '\n';
+
+            if (errors.length > 0) {
+              message += `### ❌ Required Actions (${errors.length})\n\n`;
+              message += errors.map(e => `- ${e}`).join('\n') + '\n\n';
+              errors.forEach(e => core.error(e));
+            }
+            if (warnings.length > 0) {
+              message += `### ⚠️ Recommendations (${warnings.length})\n\n`;
+              message += warnings.map(w => `- ${w}`).join('\n') + '\n\n';
+              warnings.forEach(w => core.warning(w));
+            }
+            if (errors.length === 0 && warnings.length === 0) {
+              message += '### ✅ All checks passed. Thank you!\n';
+            } else if (errors.length === 0) {
+              message += '### ✅ All required checks passed.\n';
+            }
+            if (isDraft) {
+              message += '\n_This is a draft; the same checks apply when it is marked ready for review._\n';
+            }
+
+            await core.summary.addRaw(message).write();
+
+            if (errors.length > 0) {
+              core.setFailed(`PR validation failed with ${errors.length} required action(s). See the job summary for details.`);
+            }
+
+            if (!canWrite) return;
+
+            // ---- Upsert one comment ----
+            const botTag = '<!-- pr-validation-bot -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+            });
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes(botTag));
+            const commentBody = `${botTag}\n${message}`;
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: commentBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: commentBody,
+              });
+            }

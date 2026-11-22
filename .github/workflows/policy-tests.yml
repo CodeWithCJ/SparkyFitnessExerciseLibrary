@@ -1,0 +1,33 @@
+name: Policy tests
+
+# Guards the PR automation. The PR Checks workflow runs from the base branch, so a broken rule
+# would otherwise only show up on the next contributor's PR.
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/**'
+      - '.github/pull_request_template.md'
+      - '.github/workflows/pr-validation.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/**'
+      - '.github/pull_request_template.md'
+      - '.github/workflows/pr-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test PR policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test ".github/scripts/*.test.cjs"
