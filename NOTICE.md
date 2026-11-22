@@ -32,6 +32,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## Free Exercise DB
+
+1,236 exercises list an ID from the [free-exercise-db](https://github.com/yuhonas/free-exercise-db) project in `sources.free_id`; their names and exercise details were matched with, and in part adapted from, that dataset. It is released into the public domain under [The Unlicense](https://unlicense.org/), which requires no notice. It is credited here as a courtesy. No images from it are included.
+
 ## Body map figures (browse site)
 
 The female figure's paths were converted from react-native-body-highlighter 3.2.0 (MIT, Copyright (c) 2022 ELABBASSI Hicham). The full notice is kept in the header of `muscle-female.svg`.
