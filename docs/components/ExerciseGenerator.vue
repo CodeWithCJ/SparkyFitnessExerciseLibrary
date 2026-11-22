@@ -4,6 +4,8 @@ import { withBase } from 'vitepress';
 import BodyMap from './BodyMap.vue';
 import ListEditor from './ListEditor.vue';
 import ChoiceButtons from './ChoiceButtons.vue';
+import CopyText from './CopyText.vue';
+import { copyText } from './clipboard';
 import { MAP_MUSCLES } from './bodyMapData';
 import { equipmentIconSvg } from './equipmentIcons';
 import codes from '../../taxonomy/catalog-codes.json';
@@ -31,19 +33,20 @@ import {
  * the repository's `pnpm validate` uses (scripts/lib), shows what is wrong, and hands the result to
  * GitHub. `?edit=<id>` opens an existing exercise for editing.
  */
+interface MediaSet {
+  video_vertical_path?: string | null;
+  video_horizontal_path?: string | null;
+  animation_vertical_path?: string | null;
+  animation_horizontal_path?: string | null;
+  thumbnail_path?: string | null;
+}
 interface CatalogEntry {
   id: string;
   slug: string;
   folder: string;
   name: string;
   taxonomy: { category: string; body_part: string; primary_muscles: string[] };
-  media?: {
-    video_vertical_path?: string | null;
-    video_horizontal_path?: string | null;
-    animation_vertical_path?: string | null;
-    animation_horizontal_path?: string | null;
-    thumbnail_path?: string | null;
-  };
+  media?: MediaSet & { male?: MediaSet; female?: MediaSet };
 }
 
 const REPO = 'https://github.com/CodeWithCJ/SparkyFitnessExerciseLibrary';
@@ -71,11 +74,11 @@ const form = reactive(emptyForm());
 const editing = ref<CatalogEntry | null>(null);
 const base = ref<Record<string, unknown>>({ $schema: SCHEMA_REF });
 const slugEdited = ref('');
-const model = ref<'m' | 'f'>('m');
 const picking = ref<'primary' | 'secondary'>('primary');
 const figure = ref<'male' | 'female'>('male');
 const showRehab = ref(false);
 const copied = ref(false);
+const editCopied = ref<boolean | null>(null); // null: not tried, true: copied, false: could not copy
 
 /* ---------- derived ---------- */
 const categories = computed(() => [...new Set(catalog.value.map((e) => e.taxonomy.category))].sort());
@@ -139,16 +142,20 @@ const warnings = computed(() => {
 });
 const ready = computed(() => problems.value.length === 0 && !!folder.value);
 
-const media = computed(() => (folder.value ? mediaFileNames(folder.value, model.value) : null));
+const mediaM = computed(() => (folder.value ? mediaFileNames(folder.value, 'm') : null));
+const mediaF = computed(() => (folder.value ? mediaFileNames(folder.value, 'f') : null));
 
 // Media this exercise already has (edit mode), so a contributor can see what is missing.
-const existingMedia = computed(() => {
-  const m = editing.value?.media;
-  return [m?.video_vertical_path, m?.video_horizontal_path, m?.animation_vertical_path, m?.animation_horizontal_path, m?.thumbnail_path]
+const setNames = (set?: MediaSet) =>
+  [set?.video_vertical_path, set?.video_horizontal_path, set?.animation_vertical_path, set?.animation_horizontal_path, set?.thumbnail_path]
     .filter((p): p is string => !!p)
     .map((p) => p.split('/').pop() as string);
+const existingMedia = computed(() => {
+  const m = editing.value?.media;
+  return [...new Set([...setNames(m), ...setNames(m?.male), ...setNames(m?.female)])];
 });
-const hasModel = (letter: 'm' | 'f') => existingMedia.value.some((n) => n.includes(`_${letter}_`));
+const folderUrl = computed(() => (folder.value ? `${REPO}/tree/main/exercises/${folder.value}` : ''));
+const have = (name: string) => existingMedia.value.includes(name);
 
 const githubUrl = computed(() => {
   if (!folder.value) return '';
@@ -166,6 +173,20 @@ function toggleMuscle(m: string) {
   const i = target.indexOf(m);
   if (i >= 0) target.splice(i, 1);
   else target.push(m);
+}
+const MUSCLE_STATES = [
+  { value: 'none', label: 'None' },
+  { value: 'primary', label: 'Primary' },
+  { value: 'secondary', label: 'Secondary' },
+];
+const muscleState = (m: string) => (form.primary.includes(m) ? 'primary' : form.secondary.includes(m) ? 'secondary' : 'none');
+function setMuscleState(m: string, state: string) {
+  for (const list of [form.primary, form.secondary]) {
+    const i = list.indexOf(m);
+    if (i >= 0) list.splice(i, 1);
+  }
+  if (state === 'primary') form.primary.push(m);
+  else if (state === 'secondary') form.secondary.push(m);
 }
 function removeMuscle(list: string[], m: string) {
   list.splice(list.indexOf(m), 1);
@@ -231,12 +252,16 @@ const bodyPartChoice = computed({
 });
 
 /* ---------- output ---------- */
+// Opening GitHub's editor: copy the JSON in the same click so it can be pasted straight in.
+function onOpenGithub() {
+  if (!editing.value) return;
+  void copyText(jsonText.value).then((ok) => (editCopied.value = ok));
+}
 async function copy() {
-  try {
-    await navigator.clipboard.writeText(jsonText.value);
+  if (await copyText(jsonText.value)) {
     copied.value = true;
     setTimeout(() => (copied.value = false), 1800);
-  } catch {
+  } else {
     window.prompt('Copy the JSON:', jsonText.value);
   }
 }
@@ -269,8 +294,6 @@ onMounted(async () => {
     return;
   }
   editing.value = entry;
-  // Offer the version that is still missing (all videos are male today, so this is usually female).
-  if (hasModel('m') && !hasModel('f')) model.value = 'f';
   // The file on GitHub is the source of truth (it keeps fields the catalog leaves out).
   let source: Record<string, unknown> | null = null;
   try {
@@ -359,6 +382,20 @@ onMounted(async () => {
               <button v-for="m in undrawn" :key="m" type="button" class="chip-btn" @click="toggleMuscle(m)">+ {{ m }}</button>
             </div>
           </template>
+          <details class="list-pick">
+            <summary>Choose muscles from a list instead</summary>
+            <div class="list-grid">
+              <div v-for="m in muscleList" :key="m" class="list-row">
+                <span class="name">{{ m }}</span>
+                <ChoiceButtons
+                  :model-value="muscleState(m)"
+                  :options="MUSCLE_STATES"
+                  :aria-label="m"
+                  @update:model-value="(v: string) => setMuscleState(m, v)"
+                />
+              </div>
+            </div>
+          </details>
           <div class="picked">
             <div>
               <h3>Primary <span class="muted small">(the first one sets the ID)</span></h3>
@@ -457,41 +494,105 @@ onMounted(async () => {
           <ListEditor v-model="form.cues" item-label="Cue" add-label="+ Add cue" :rows="2" />
         </section>
 
-        <section v-if="media">
+        <section v-if="mediaM && mediaF">
           <h2>7. Videos and images <span class="muted small">(optional)</span></h2>
           <p>
-            A video is the best demonstration; without one, a still image is fine. Attach the files to the pull request with exactly these
-            names.
+            A video is the best demonstration; without one, a still image is fine. Add the files to the exercise folder, next to
+            <code>exercise.json</code>, with exactly these names. Add the version you have: the letter in each name says who is shown,
+            <b>m</b> for a male model and <b>f</b> for a female model, and apps use it to show the right one.
           </p>
           <p class="muted small">
-            The letter in each name says who is shown: <b>m</b> for a male model, <b>f</b> for a female model. Apps use it to show the right
-            version.
+            <template v-if="editing">
+              Open <a :href="folderUrl" target="_blank" rel="noopener">the exercise folder on GitHub ↗</a>, choose <b>Add file → Upload files</b>
+              and drop the files in.
+            </template>
+            <template v-else>
+              After GitHub opens your pull request, click your branch name at the top of it, open <code>exercises/{{ folder }}</code>, choose
+              <b>Add file → Upload files</b> and drop the files in.
+            </template>
           </p>
-          <div class="seg small" role="group" aria-label="Who is shown">
-            <button type="button" :aria-pressed="model === 'm'" @click="model = 'm'">Male (m)</button>
-            <button type="button" :aria-pressed="model === 'f'" @click="model = 'f'">Female (f)</button>
-          </div>
 
           <dl class="media-files">
             <div>
               <dt>Vertical video <span class="badge you">you add</span></dt>
-              <dd class="mono">{{ media.video_vertical }}</dd>
+              <dd>
+                <ul class="by-model">
+                <li>
+                  <span class="who">Male (m)</span>
+                  <CopyText :text="mediaM.video_vertical" what="file name" />
+                  <span v-if="have(mediaM.video_vertical)" class="have">✓ in library</span>
+                </li>
+                <li>
+                  <span class="who">Female (f)</span>
+                  <CopyText :text="mediaF.video_vertical" what="file name" />
+                  <span v-if="have(mediaF.video_vertical)" class="have">✓ in library</span>
+                </li>
+                </ul>
+              </dd>
               <dd class="muted small">9:16, 720×1280. Made for phones. Recommended.</dd>
             </div>
             <div>
               <dt>Horizontal video <span class="badge you">you add, optional</span></dt>
-              <dd class="mono">{{ media.video_horizontal }}</dd>
+              <dd>
+                <ul class="by-model">
+                <li>
+                  <span class="who">Male (m)</span>
+                  <CopyText :text="mediaM.video_horizontal" what="file name" />
+                  <span v-if="have(mediaM.video_horizontal)" class="have">✓ in library</span>
+                </li>
+                <li>
+                  <span class="who">Female (f)</span>
+                  <CopyText :text="mediaF.video_horizontal" what="file name" />
+                  <span v-if="have(mediaF.video_horizontal)" class="have">✓ in library</span>
+                </li>
+                </ul>
+              </dd>
               <dd class="muted small">16:9, 1280×720. Made for the web and desktop.</dd>
             </div>
             <div>
               <dt>Animated preview <span class="badge auto">made from the video</span></dt>
-              <dd class="mono">{{ media.animation_vertical }}</dd>
-              <dd class="mono">{{ media.animation_horizontal }}</dd>
+              <dd>
+                <ul class="by-model">
+                <li>
+                  <span class="who">Male (m)</span>
+                  <CopyText :text="mediaM.animation_vertical" what="file name" />
+                  <span v-if="have(mediaM.animation_vertical)" class="have">✓ in library</span>
+                </li>
+                <li>
+                  <span class="who">Male (m)</span>
+                  <CopyText :text="mediaM.animation_horizontal" what="file name" />
+                  <span v-if="have(mediaM.animation_horizontal)" class="have">✓ in library</span>
+                </li>
+                <li>
+                  <span class="who">Female (f)</span>
+                  <CopyText :text="mediaF.animation_vertical" what="file name" />
+                  <span v-if="have(mediaF.animation_vertical)" class="have">✓ in library</span>
+                </li>
+                <li>
+                  <span class="who">Female (f)</span>
+                  <CopyText :text="mediaF.animation_horizontal" what="file name" />
+                  <span v-if="have(mediaF.animation_horizontal)" class="have">✓ in library</span>
+                </li>
+                </ul>
+              </dd>
               <dd class="muted small">A short loop shown in exercise lists. Created by <code>pnpm media</code>.</dd>
             </div>
             <div>
               <dt>Thumbnail / still image <span class="badge auto">made from the video</span></dt>
-              <dd class="mono">{{ media.thumbnail }}</dd>
+              <dd>
+                <ul class="by-model">
+                <li>
+                  <span class="who">Male (m)</span>
+                  <CopyText :text="mediaM.thumbnail" what="file name" />
+                  <span v-if="have(mediaM.thumbnail)" class="have">✓ in library</span>
+                </li>
+                <li>
+                  <span class="who">Female (f)</span>
+                  <CopyText :text="mediaF.thumbnail" what="file name" />
+                  <span v-if="have(mediaF.thumbnail)" class="have">✓ in library</span>
+                </li>
+                </ul>
+              </dd>
               <dd class="muted small">
                 The still picture on the card, created from the video by <code>pnpm media</code>. No video? Add your own picture instead, as
                 <code>.webp</code>, <code>.jpg</code> or <code>.png</code> with this name.
@@ -501,12 +602,10 @@ onMounted(async () => {
 
           <p class="muted small">
             Videos: MP4 (H.264) without sound, 5 to 15 seconds, one or two clean repetitions that start and end in the same position so they
-            loop, up to 2.5 MB. You only need to supply the videos: a maintainer creates the previews and the thumbnail and hosts the files.
+            loop, up to 2.5 MB. You only need to supply the videos: the previews and the thumbnail are created from your video automatically after the merge (or with <code>pnpm media</code> if you work locally).
           </p>
           <p v-if="editing" class="muted small">
-            <template v-if="existingMedia.length">
-              Already in the library: <span class="mono">{{ existingMedia.join(', ') }}</span>. A file with the same name replaces it.
-            </template>
+            <template v-if="existingMedia.length">A file with the same name as one marked "in library" replaces it.</template>
             <template v-else>This exercise has no videos or images yet.</template>
           </p>
           <p class="muted small">
@@ -550,9 +649,12 @@ onMounted(async () => {
           <h2>Result</h2>
           <dl class="ids">
             <dt>ID</dt>
-            <dd class="mono">{{ id || '…' }}</dd>
+            <dd><CopyText v-if="id" :text="id" what="ID" /><span v-else class="mono">…</span></dd>
             <dt>Folder</dt>
-            <dd class="mono">{{ folder ? `exercises/${folder}/` : '…' }}</dd>
+            <dd>
+              <template v-if="folder"><span class="mono muted">exercises/</span><CopyText :text="folder" what="folder name" /></template>
+              <span v-else class="mono">…</span>
+            </dd>
           </dl>
           <p v-if="!editing && prefix" class="muted small">
             <b>{{ prefix }}</b> comes from <b>{{ form.primary[0] }}</b> and <b>{{ form.equipment }}</b>; the number is the next free one.
@@ -575,7 +677,7 @@ onMounted(async () => {
           <div class="actions">
             <button type="button" class="btn" @click="copy">{{ copied ? 'Copied ✓' : 'Copy JSON' }}</button>
             <button type="button" class="btn" @click="download">Download</button>
-            <a v-if="ready && !(urlTooLong && !editing)" class="btn primary" :href="githubUrl" target="_blank" rel="noopener">
+            <a v-if="ready && !(urlTooLong && !editing)" class="btn primary" :href="githubUrl" target="_blank" rel="noopener" @click="onOpenGithub">
               {{ editing ? 'Edit on GitHub' : 'Create on GitHub' }} ↗
             </a>
             <span v-else class="btn primary disabled" aria-disabled="true">{{ editing ? 'Edit on GitHub' : 'Create on GitHub' }} ↗</span>
@@ -583,7 +685,9 @@ onMounted(async () => {
           <p v-if="urlTooLong && !editing" class="notice warn">
             This is too long for a prefilled link. Copy the JSON, then create the file on GitHub yourself.
           </p>
-          <p v-if="editing" class="muted small">GitHub opens the existing file in its editor: paste the JSON above over its contents, then propose the change.</p>
+          <p v-if="editCopied === true" class="notice ok">✓ JSON copied. In GitHub's editor, select all (Ctrl/Cmd + A), paste, then propose the change.</p>
+          <p v-else-if="editCopied === false" class="notice warn">Could not copy automatically. Use Copy JSON, then paste it over the file in GitHub's editor.</p>
+          <p v-else-if="editing" class="muted small">Clicking Edit on GitHub copies the JSON. In GitHub's editor, select all (Ctrl/Cmd + A), paste, then propose the change.</p>
           <p v-else class="muted small">GitHub forks the repository and opens the pull request for you. Then fill in its checklist; for media, confirm you have the rights.</p>
         </div>
 
@@ -944,7 +1048,7 @@ textarea:focus {
 .media-files {
   margin: 10px 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 .media-files > div {
@@ -959,6 +1063,30 @@ textarea:focus {
 }
 .media-files dd {
   margin: 2px 0 0;
+}
+.by-model {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 2px;
+  display: grid;
+  gap: 6px;
+}
+.by-model li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.who {
+  flex: none;
+  width: 76px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+.have {
+  font-size: 11px;
+  color: var(--vp-c-success-1);
 }
 .badge {
   display: inline-block;
@@ -995,6 +1123,37 @@ textarea:focus {
   .grid2,
   .picked,
   .media-files {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* a list alternative to the body map, for keyboards and screen readers */
+.list-pick {
+  margin: 10px 0;
+}
+.list-pick summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--vp-c-brand-1);
+}
+.list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+.list-row .name {
+  text-transform: capitalize;
+}
+@media (max-width: 900px) {
+  .list-grid {
     grid-template-columns: 1fr;
   }
 }

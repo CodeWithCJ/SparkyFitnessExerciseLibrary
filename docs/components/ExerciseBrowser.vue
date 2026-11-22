@@ -360,6 +360,23 @@ onBeforeUnmount(() => {
               :available="availableMuscles"
               @toggle="(m) => toggle(state.muscles, m)"
             />
+            <details class="list-pick">
+              <summary>Choose from a list instead</summary>
+              <div class="list-grid">
+                <label v-for="m in MUSCLES" :key="m" class="list-row">
+                  <span class="check">
+                    <input
+                      type="checkbox"
+                      :checked="state.muscles.includes(m)"
+                      :disabled="!muscleCounts.get(m) && !state.muscles.includes(m)"
+                      @change="toggle(state.muscles, m)"
+                    />
+                    <span class="name">{{ m }}</span>
+                  </span>
+                  <span class="muted">{{ muscleCounts.get(m) ?? 0 }}</span>
+                </label>
+              </div>
+            </details>
             <template v-if="undrawnMuscles.length">
             <p class="muted small chips-label">Not drawn on the body map:</p>
             <div class="chips">
@@ -1176,5 +1193,40 @@ select:focus {
     grid-template-columns: 1fr;
     padding: 16px;
   }
+}
+
+/* a list alternative to the body map, for keyboards and screen readers */
+.list-pick {
+  margin: 10px 0;
+}
+.list-pick summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--vp-c-brand-1);
+}
+.list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+.list-row .name {
+  text-transform: capitalize;
+}
+.list-row .check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel-muscles {
+  max-height: 75vh;
+  overflow: auto;
 }
 </style>
