@@ -365,9 +365,6 @@ onBeforeUnmount(() => {
   <div ref="root" class="xb">
     <div ref="toolbar" class="xb-toolbar">
       <div class="tb-row main">
-        <div class="search">
-          <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
-        </div>
         <button
           type="button"
           class="pop-btn"
@@ -413,6 +410,9 @@ onBeforeUnmount(() => {
         <select v-model="state.lang" aria-label="Language" class="lang">
           <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
         </select>
+        <div class="search">
+          <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
+        </div>
         <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
           Filters<span v-if="activeCount"> ({{ activeCount }})</span>
         </button>
