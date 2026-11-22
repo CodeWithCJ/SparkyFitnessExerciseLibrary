@@ -1,0 +1,7 @@
+node_modules
+.vitepress/dist
+.vitepress/cache
+# Copied in by scripts/prepare-site.mjs from dist/, locales/ and exercises/
+src/public/data
+src/public/locales
+src/public/exercises

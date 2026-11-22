@@ -9,7 +9,9 @@
     "media": "node scripts/optimize-media.mjs",
     "optimize-media": "node scripts/optimize-media.mjs",
     "list": "node scripts/list.mjs",
-    "exercises": "node scripts/list.mjs"
+    "exercises": "node scripts/list.mjs",
+    "docs:dev": "pnpm --dir docs run dev",
+    "docs:build": "pnpm --dir docs run build"
   },
   "devDependencies": {
     "sharp": "^0.33.5"
