@@ -92,6 +92,7 @@ export function emptyForm() {
     steps: [''],
     cues: [''],
     youtube: { url: '', start: '', end: '' },
+    credits: [],
     rehab: { joint: '', conditions: [''], contraindications: [''], protocol: '' },
   };
 }
@@ -127,6 +128,7 @@ export function exerciseToForm(exercise) {
     steps: rows(exercise.steps),
     cues: rows(exercise.coaching_cues),
     youtube: youtubeToForm(exercise.media?.youtube_url),
+    credits: (exercise.sources?.media ?? []).map((c) => ({ ...c, files: [...(c.files || [])] })),
     rehab: {
       joint: r.joint || '',
       conditions: rows(r.target_conditions),
@@ -178,6 +180,15 @@ export function applyForm(base, form) {
   };
   if (Object.keys(rehab).length) out.rehabilitation = rehab;
   else delete out.rehabilitation;
+
+  // Credits for media from elsewhere (sources.media) are kept unless the person removed them.
+  if (base.sources || form.credits.length) {
+    const sources = { ...(base.sources || {}) };
+    if (form.credits.length) sources.media = form.credits.map((c) => ({ ...c, files: [...c.files] }));
+    else delete sources.media;
+    if (Object.keys(sources).length) out.sources = sources;
+    else delete out.sources;
+  }
 
   const link = youtubeFromForm(form.youtube);
 

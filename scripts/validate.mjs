@@ -84,6 +84,30 @@ for (const folder of exerciseFolders) {
     }
   }
 
+  // 4a. Credits for media from elsewhere (sources.media): the files must exist and the credit must be complete
+  for (const [i, credit] of (exercise.sources?.media ?? []).entries()) {
+    for (const key of ['author', 'url', 'license']) {
+      if (typeof credit[key] !== 'string' || !credit[key].trim()) {
+        console.error(`❌ [${folder}] sources.media[${i}] needs '${key}'`);
+        errorCount++;
+      }
+    }
+    if (typeof credit.url === 'string' && !credit.url.startsWith('https://')) {
+      console.error(`❌ [${folder}] sources.media[${i}].url must be an https:// address`);
+      errorCount++;
+    }
+    if (!Array.isArray(credit.files) || credit.files.length === 0) {
+      console.error(`❌ [${folder}] sources.media[${i}].files must list the covered files`);
+      errorCount++;
+    }
+    for (const file of credit.files ?? []) {
+      if (!fs.existsSync(path.join(exercisePath, file))) {
+        console.error(`❌ [${folder}] sources.media[${i}] lists '${file}', which is not in the folder`);
+        errorCount++;
+      }
+    }
+  }
+
   // 4b. Media file names: <folder>_<m|f>_<9_16|16_9|thumb>.<ext>, and a path short enough for Windows
   const namePattern = mediaNamePattern(folder);
   for (const entry of fs.readdirSync(exercisePath, { withFileTypes: true })) {

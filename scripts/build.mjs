@@ -104,7 +104,9 @@ for (const folder of exerciseFolders) {
     ...publishedFields,
     instructions: exercise.steps.join(' '),
     folder: folder,
-    media: { ...discoveredMedia, ...(youtube ? { youtube_url: exercise.media.youtube_url, youtube } : {}) },
+    media: { ...discoveredMedia, ...(youtube ? { youtube_url: exercise.media.youtube_url, youtube } : {}),
+      ...(exercise.sources?.media?.length ? { credits: exercise.sources.media } : {}),
+    },
   };
 
   allExercises.push(compiledExercise);

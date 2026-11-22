@@ -16,6 +16,7 @@ interface Media {
   thumbnail_path?: string | null;
   image_path?: string | null;
   youtube_url?: string;
+  credits?: { files: string[]; author: string; url: string; license: string; credit_text?: string; credit_url?: string }[];
   male?: Media;
   female?: Media;
 }
@@ -226,6 +227,7 @@ const sources = computed(() => {
   };
 });
 const yt = computed(() => (current.value?.media?.youtube_url ? parseYouTube(current.value.media.youtube_url) : null));
+const credit = computed(() => current.value?.media?.credits?.[0] ?? null);
 const ytClip = computed(() => {
   const y = yt.value;
   if (!y || (y.start == null && y.end == null)) return '';
@@ -593,6 +595,12 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </div>
+          <p v-if="view.kind !== 'youtube' && credit" class="muted small yt-credit">
+            <a :href="credit.credit_url || credit.url" target="_blank" rel="noopener noreferrer">{{
+              credit.credit_text || `Video by ${credit.author}`
+            }}</a>
+            · <a :href="credit.url" target="_blank" rel="noopener noreferrer">Source ↗</a>
+          </p>
           <p v-if="view.kind === 'youtube' && yt" class="muted small yt-credit">
             Video on YouTube<template v-if="ytClip"> ({{ ytClip }})</template>.
             <a :href="youtubeWatchUrl(yt)" target="_blank" rel="noopener noreferrer">Open on YouTube ↗</a>

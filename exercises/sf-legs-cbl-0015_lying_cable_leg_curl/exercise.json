@@ -1,0 +1,60 @@
+{
+  "$schema": "../../schema/exercise.schema.json",
+  "id": "sf-legs-cbl-0015",
+  "slug": "lying_cable_leg_curl",
+  "name": "Lying Cable Leg Curl",
+  "aliases": [
+    "Cable Lying Leg Curl",
+    "Prone Cable Leg Curl"
+  ],
+  "taxonomy": {
+    "modality": "weight_reps",
+    "category": "upper legs",
+    "body_part": "upper legs",
+    "mechanic": "isolation",
+    "force": "pull",
+    "level": "intermediate",
+    "equipment": "cable",
+    "primary_muscles": [
+      "hamstrings"
+    ],
+    "secondary_muscles": [
+      "calves"
+    ]
+  },
+  "biomechanics": {
+    "laterality": "bilateral",
+    "movement_plane": "sagittal",
+    "default_tempo": "2-0-2-0",
+    "demonstration_reps": 2
+  },
+  "steps": [
+    "Set a cable pulley to the lowest position and attach an ankle strap or a short handle.",
+    "Lie face down on a flat bench with your feet toward the cable and secure the attachment around your ankles.",
+    "Hold the front of the bench or its handles and keep your hips pressed down and your legs straight.",
+    "Curl your heels toward your glutes by bending your knees, without lifting your hips off the bench.",
+    "Pause for a moment when your hamstrings are fully contracted.",
+    "Slowly straighten your legs back to the starting position and repeat for the desired number of repetitions."
+  ],
+  "coaching_cues": [
+    "Keep your hips flat on the bench",
+    "Control the weight on the way down",
+    "Do not swing the weight to start the curl"
+  ],
+  "sources": {
+    "media": [
+      {
+        "files": [
+          "sf-legs-cbl-0015_lying_cable_leg_curl_f_9_16.mp4"
+        ],
+        "author": "Your Move",
+        "url": "https://ymove.app/free-exercise-videos",
+        "license": "Your Move free exercise video terms: free for commercial use with credit, no resale or redistribution as a standalone video library",
+        "license_id": "ymove-free-video",
+        "credit_text": "Exercise video by Your Move (ymove.app)",
+        "credit_url": "https://ymove.app/exercise-api",
+        "retrieved": "2026-11-22"
+      }
+    ]
+  }
+}

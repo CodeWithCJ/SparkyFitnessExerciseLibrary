@@ -164,6 +164,8 @@ const existingMedia = computed(() => {
 });
 const folderUrl = computed(() => (folder.value ? `${REPO}/tree/main/exercises/${folder.value}` : ''));
 const have = (name: string) => existingMedia.value.includes(name);
+const creditOf = (name: string) => form.credits.find((c) => c.files.includes(name));
+const removeCredit = (i: number) => form.credits.splice(i, 1);
 
 const githubUrl = computed(() => {
   if (!folder.value) return '';
@@ -508,6 +510,23 @@ onMounted(async () => {
             </template>
           </p>
 
+          <div v-if="form.credits.length" class="credits">
+            <h3>Credits</h3>
+            <p class="muted small">
+              These files are not our own work. They keep the credit below. If you replace one with your own video, remove its credit, or
+              your video would be shown as someone else's.
+            </p>
+            <div v-for="(c, i) in form.credits" :key="c.files.join()" class="credit">
+              <p>
+                <b><a :href="c.credit_url || c.url" target="_blank" rel="noopener noreferrer">{{ c.credit_text || `Video by ${c.author}` }}</a></b>
+                · <a :href="c.url" target="_blank" rel="noopener noreferrer">source ↗</a>
+              </p>
+              <ul class="by-model"><li v-for="f in c.files" :key="f"><CopyText :text="f" what="file name" /></li></ul>
+              <p class="muted small">{{ c.license }}</p>
+              <button type="button" class="btn" @click="removeCredit(i)">Remove this credit</button>
+            </div>
+          </div>
+
           <dl class="media-files">
             <div>
               <dt>Vertical video <span class="badge you">you add</span></dt>
@@ -517,11 +536,13 @@ onMounted(async () => {
                   <span class="who">Male (m)</span>
                   <CopyText :text="mediaM.video_vertical" what="file name" />
                   <span v-if="have(mediaM.video_vertical)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaM.video_vertical)" class="have">by {{ creditOf(mediaM.video_vertical)?.author }}</span>
                 </li>
                 <li>
                   <span class="who">Female (f)</span>
                   <CopyText :text="mediaF.video_vertical" what="file name" />
                   <span v-if="have(mediaF.video_vertical)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaF.video_vertical)" class="have">by {{ creditOf(mediaF.video_vertical)?.author }}</span>
                 </li>
                 </ul>
               </dd>
@@ -535,11 +556,13 @@ onMounted(async () => {
                   <span class="who">Male (m)</span>
                   <CopyText :text="mediaM.video_horizontal" what="file name" />
                   <span v-if="have(mediaM.video_horizontal)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaM.video_horizontal)" class="have">by {{ creditOf(mediaM.video_horizontal)?.author }}</span>
                 </li>
                 <li>
                   <span class="who">Female (f)</span>
                   <CopyText :text="mediaF.video_horizontal" what="file name" />
                   <span v-if="have(mediaF.video_horizontal)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaF.video_horizontal)" class="have">by {{ creditOf(mediaF.video_horizontal)?.author }}</span>
                 </li>
                 </ul>
               </dd>
@@ -1174,5 +1197,24 @@ textarea:focus {
   background: rgb(245 184 61 / 20%);
   border-color: #9a6b00;
   color: #9a6b00;
+}
+.credits {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg-soft);
+}
+.credits h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+.credit p {
+  margin: 4px 0;
+}
+.credit + .credit {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vp-c-divider);
 }
 </style>
