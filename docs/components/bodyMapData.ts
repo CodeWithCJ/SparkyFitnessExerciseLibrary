@@ -28,6 +28,10 @@ export const SVG_CLASS_TO_MUSCLE: Record<string, string> = {
   abductors: 'abductors',
 };
 
+let uidCounter = 0;
+/** A number that is different for every body map drawn on the page, to keep SVG element ids unique. */
+export const nextUid = () => String(++uidCounter);
+
 /** Every muscle a person can click on the map. */
 export const MAP_MUSCLES = new Set(Object.values(SVG_CLASS_TO_MUSCLE));
 

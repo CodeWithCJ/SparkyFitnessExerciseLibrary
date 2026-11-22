@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { withBase } from 'vitepress';
-import { EXTRA_REGIONS, SVG_CLASS_TO_MUSCLE } from './bodyMapData';
+import { EXTRA_REGIONS, SVG_CLASS_TO_MUSCLE, nextUid } from './bodyMapData';
 
 /**
  * Front/back muscle figure from the SparkyFitness web app (muscle-male.svg,
@@ -61,7 +61,7 @@ const svgEl = (tag: string, attrs: Record<string, string> = {}) => {
 function addExtraRegions() {
   const svg = host.value?.querySelector('svg');
   if (!svg) return;
-  const uid = Math.random().toString(36).slice(2, 8);
+  const uid = nextUid();
 
   const defs = svgEl('defs');
   const clip = svgEl('clipPath', { id: `bm-clip-${uid}` });
