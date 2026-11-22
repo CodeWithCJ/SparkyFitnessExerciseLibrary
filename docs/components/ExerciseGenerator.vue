@@ -6,7 +6,6 @@ import ListEditor from './ListEditor.vue';
 import ChoiceButtons from './ChoiceButtons.vue';
 import CopyText from './CopyText.vue';
 import { copyText } from './clipboard';
-import { MAP_MUSCLES } from './bodyMapData';
 import { equipmentIconSvg } from './equipmentIcons';
 import codes from '../../taxonomy/catalog-codes.json';
 import muscleList from '../../taxonomy/muscles.json';
@@ -57,7 +56,6 @@ const checkContext = {
   validEquipment: new Set<string>(equipmentList),
   validModalities: new Set<string>(modalityList),
 };
-const undrawn = (muscleList as string[]).filter((m) => !MAP_MUSCLES.has(m));
 const label = (v: string) => v.replace(/_/g, ' ');
 const asOptions = (list: string[]) => list.map((v) => ({ value: v, label: label(v) }));
 const MODALITY_OPTIONS = asOptions(modalityList as string[]);
@@ -76,7 +74,7 @@ const base = ref<Record<string, unknown>>({ $schema: SCHEMA_REF });
 const slugEdited = ref('');
 const picking = ref<'primary' | 'secondary'>('primary');
 const figure = ref<'male' | 'female'>('male');
-const showRehab = ref(false);
+const showRehab = ref(true);
 const copied = ref(false);
 const editCopied = ref<boolean | null>(null); // null: not tried, true: copied, false: could not copy
 
@@ -174,20 +172,7 @@ function toggleMuscle(m: string) {
   if (i >= 0) target.splice(i, 1);
   else target.push(m);
 }
-const MUSCLE_STATES = [
-  { value: 'none', label: 'None' },
-  { value: 'primary', label: 'Primary' },
-  { value: 'secondary', label: 'Secondary' },
-];
 const muscleState = (m: string) => (form.primary.includes(m) ? 'primary' : form.secondary.includes(m) ? 'secondary' : 'none');
-function setMuscleState(m: string, state: string) {
-  for (const list of [form.primary, form.secondary]) {
-    const i = list.indexOf(m);
-    if (i >= 0) list.splice(i, 1);
-  }
-  if (state === 'primary') form.primary.push(m);
-  else if (state === 'secondary') form.secondary.push(m);
-}
 function removeMuscle(list: string[], m: string) {
   list.splice(list.indexOf(m), 1);
 }
@@ -373,29 +358,25 @@ onMounted(async () => {
             </div>
           </div>
           <p class="muted small">Click the body to add or remove a muscle in the group selected above.</p>
-          <div class="map-wrap">
-            <BodyMap :figure="figure" mode="select" :primary="form.primary" :secondary="form.secondary" @toggle="toggleMuscle" />
-          </div>
-          <template v-if="undrawn.length">
-            <p class="muted small chips-label">Not drawn on the body map, add them here:</p>
-            <div class="chips">
-              <button v-for="m in undrawn" :key="m" type="button" class="chip-btn" @click="toggleMuscle(m)">+ {{ m }}</button>
+          <div class="muscle-body">
+            <div class="map-wrap">
+              <BodyMap :figure="figure" mode="select" :primary="form.primary" :secondary="form.secondary" @toggle="toggleMuscle" />
             </div>
-          </template>
-          <details class="list-pick">
-            <summary>Choose muscles from a list instead</summary>
-            <div class="list-grid">
-              <div v-for="m in muscleList" :key="m" class="list-row">
-                <span class="name">{{ m }}</span>
-                <ChoiceButtons
-                  :model-value="muscleState(m)"
-                  :options="MUSCLE_STATES"
-                  :aria-label="m"
-                  @update:model-value="(v: string) => setMuscleState(m, v)"
-                />
+            <div class="muscle-side">
+              <p class="muted small">Or tap a muscle here. The group selected above is used.</p>
+              <div class="chips">
+                <button
+                  v-for="m in muscleList"
+                  :key="m"
+                  type="button"
+                  class="chip-btn"
+                  :class="muscleState(m)"
+                  :aria-pressed="muscleState(m) !== 'none'"
+                  @click="toggleMuscle(m)"
+                >{{ m }}</button>
               </div>
             </div>
-          </details>
+          </div>
           <div class="picked">
             <div>
               <h3>Primary <span class="muted small">(the first one sets the ID)</span></h3>
@@ -909,9 +890,6 @@ textarea:focus {
   background: var(--vp-c-brand-1);
   color: var(--vp-c-white);
 }
-.chips-label {
-  margin: 10px 0 0;
-}
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -1127,34 +1105,33 @@ textarea:focus {
   }
 }
 
-/* a list alternative to the body map, for keyboards and screen readers */
-.list-pick {
-  margin: 10px 0;
-}
-.list-pick summary {
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--vp-c-brand-1);
-}
-.list-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 16px;
-  margin-top: 8px;
-}
-.list-row {
+.muscle-body {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 13px;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  margin: 8px 0;
 }
-.list-row .name {
-  text-transform: capitalize;
+.muscle-body .map-wrap {
+  flex: 1 1 320px;
+  max-width: 440px;
+  margin: 0;
 }
-@media (max-width: 900px) {
-  .list-grid {
-    grid-template-columns: 1fr;
-  }
+.muscle-side {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.muscle-side .chips {
+  margin: 6px 0 0;
+}
+.chip-btn.primary {
+  background: rgb(229 72 77 / 16%);
+  border-color: #c9343a;
+  color: #c9343a;
+}
+.chip-btn.secondary {
+  background: rgb(245 184 61 / 20%);
+  border-color: #9a6b00;
+  color: #9a6b00;
 }
 </style>
