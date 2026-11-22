@@ -197,9 +197,14 @@
     },
     "media": {
       "type": "object",
-      "description": "Optional. Media files are found by their names, so only the thumbnail frame is set here.",
+      "description": "Optional. Our own media files are found by their names, so only the thumbnail frame and links to videos hosted elsewhere are set here.",
       "additionalProperties": false,
       "properties": {
+        "youtube_url": {
+          "type": "string",
+          "pattern": "^https://(www\\.)?(youtu\\.be/|youtube\\.com/)",
+          "description": "Optional link to a YouTube video, played in the apps and the site. One address carries everything: https://youtu.be/<id>?t=62&end=121 plays 1:02 to 2:01 of a longer video (t is the start and end is the stop, in seconds)."
+        },
         "thumbnail_timestamp": {
           "type": "number",
           "minimum": 0,

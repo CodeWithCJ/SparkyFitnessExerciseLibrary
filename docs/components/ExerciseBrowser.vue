@@ -4,6 +4,7 @@ import { withBase } from 'vitepress';
 import BodyMap from './BodyMap.vue';
 import { MAP_MUSCLES } from './bodyMapData';
 import { equipmentIconSvg } from './equipmentIcons';
+import { parseYouTube, formatTime, youtubeEmbedUrl, youtubeWatchUrl } from '../../scripts/lib/youtube.mjs';
 
 interface Media {
   video_path?: string | null;
@@ -14,6 +15,9 @@ interface Media {
   animation_horizontal_path?: string | null;
   thumbnail_path?: string | null;
   image_path?: string | null;
+  youtube_url?: string;
+  male?: Media;
+  female?: Media;
 }
 interface Exercise {
   id: string;
@@ -77,7 +81,8 @@ const locale = ref<Record<string, LocaleEntry>>({});
 const state = reactive({
   q: '',
   lang: 'en',
-  media: '' as '' | 'video' | 'none',
+  media: '' as '' | 'video' | 'novideo',
+  model: '' as '' | 'male' | 'female',
   equipment: [] as string[],
   muscles: [] as string[],
   role: 'primary' as 'primary' | 'any',
@@ -86,14 +91,20 @@ const state = reactive({
 });
 const limit = ref(PAGE);
 const showFilters = ref(false);
-const openPanel = ref<'muscles' | 'equipment' | null>(null);
+const openPanel = ref<'equipment' | null>(null);
+const showMap = ref(false);
+const toolbar = ref<HTMLElement | null>(null);
+const root = ref<HTMLElement | null>(null);
 
 /* ---------- helpers ---------- */
 const media = (p?: string | null) => (p ? withBase('/' + p) : '');
 const label = (v?: string | null) => (v ? v.replace(/_/g, ' ') : '—');
 const tName = (e: Exercise) => locale.value[e.id]?.name || e.name;
 const hasVideo = (e: Exercise) => !!(e.media?.video_path || e.media?.video_vertical_path || e.media?.video_horizontal_path);
-const hasMedia = (e: Exercise) => hasVideo(e) || !!(e.media?.thumbnail_path || e.media?.animation_path || e.media?.image_path);
+const hasVideoOf = (e: Exercise, model: 'male' | 'female') => {
+  const m = e.media?.[model];
+  return !!(m?.video_path || m?.video_vertical_path || m?.video_horizontal_path);
+};
 const icon = (eq: string, size = 20) => equipmentIconSvg(eq, size);
 const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
 
@@ -105,8 +116,11 @@ function matches(e: Exercise, skip?: string): boolean {
     const hay = norm([e.name, tName(e), e.id, ...(e.aliases ?? [])].join(' '));
     if (!q.split(/\s+/).every((w) => hay.includes(w))) return false;
   }
-  if (state.media === 'video' && !hasVideo(e)) return false;
-  if (state.media === 'none' && hasMedia(e)) return false;
+  if (skip !== 'media') {
+    if (state.media === 'video' && !hasVideo(e)) return false;
+    if (state.media === 'novideo' && hasVideo(e)) return false;
+  }
+  if (state.model && !hasVideoOf(e, state.model)) return false;
   if (skip !== 'equipment' && state.equipment.length && !state.equipment.includes(t.equipment)) return false;
   if (skip !== 'muscles' && state.muscles.length) {
     const pool = state.role === 'any' ? [...t.primary_muscles, ...t.secondary_muscles] : t.primary_muscles;
@@ -153,6 +167,7 @@ const muscleCounts = computed(() =>
     state.role === 'any' ? [...e.taxonomy.primary_muscles, ...e.taxonomy.secondary_muscles] : e.taxonomy.primary_muscles
   )
 );
+const mediaCounts = computed(() => countsFor('media', (e) => (hasVideo(e) ? 'video' : 'novideo')));
 const availableMuscles = computed(() => MUSCLES.filter((m) => (muscleCounts.value.get(m) ?? 0) > 0));
 const undrawnMuscles = MUSCLES.filter((m) => !MAP_MUSCLES.has(m));
 const activeCount = computed(
@@ -160,6 +175,7 @@ const activeCount = computed(
     state.equipment.length +
     state.muscles.length +
     (state.media ? 1 : 0) +
+    (state.model ? 1 : 0) +
     Object.values(state.selects).filter(Boolean).length
 );
 
@@ -168,7 +184,7 @@ function toggle(list: string[], v: string) {
   if (i >= 0) list.splice(i, 1);
   else list.push(v);
 }
-function togglePanel(panel: 'muscles' | 'equipment') {
+function togglePanel(panel: 'equipment') {
   openPanel.value = openPanel.value === panel ? null : panel;
 }
 // Close the open panel on an outside click or Escape. composedPath() is read at dispatch time, so it
@@ -184,6 +200,7 @@ function onKey(e: KeyboardEvent) {
 function reset() {
   state.q = '';
   state.media = '';
+  state.model = '';
   state.equipment.splice(0);
   state.muscles.splice(0);
   for (const s of SELECTS) state.selects[s.key] = '';
@@ -192,7 +209,7 @@ function reset() {
 /* ---------- detail ---------- */
 const dialog = ref<HTMLDialogElement | null>(null);
 const current = ref<Exercise | null>(null);
-const view = reactive({ kind: 'video' as 'video' | 'animation' | 'image', orient: 'vertical' as 'vertical' | 'horizontal' });
+const view = reactive({ kind: 'video' as 'video' | 'animation' | 'image' | 'youtube', orient: 'vertical' as 'vertical' | 'horizontal' });
 
 const sources = computed(() => {
   const m = current.value?.media ?? {};
@@ -208,13 +225,20 @@ const sources = computed(() => {
     image: { vertical: m.image_path || m.thumbnail_path || '', horizontal: '' },
   };
 });
-const kinds = computed(() =>
-  (['video', 'animation', 'image'] as const).filter((k) => sources.value[k].vertical || sources.value[k].horizontal)
-);
+const yt = computed(() => (current.value?.media?.youtube_url ? parseYouTube(current.value.media.youtube_url) : null));
+const ytClip = computed(() => {
+  const y = yt.value;
+  if (!y || (y.start == null && y.end == null)) return '';
+  return `from ${formatTime(y.start ?? 0)}${y.end != null ? ` to ${formatTime(y.end)}` : ''}`;
+});
+const kinds = computed(() => {
+  const own = (['video', 'animation', 'image'] as const).filter((k) => sources.value[k].vertical || sources.value[k].horizontal);
+  return yt.value ? [...own, 'youtube' as const] : own;
+});
 const orients = computed(() =>
-  (['vertical', 'horizontal'] as const).filter((o) => sources.value[view.kind]?.[o])
+  view.kind === 'youtube' ? [] : (['vertical', 'horizontal'] as const).filter((o) => sources.value[view.kind]?.[o])
 );
-const src = computed(() => media(sources.value[view.kind]?.[view.orient] || ''));
+const src = computed(() => (view.kind === 'youtube' ? '' : media(sources.value[view.kind]?.[view.orient] || '')));
 const tSteps = computed(() => (current.value && locale.value[current.value.id]?.steps) || current.value?.steps || []);
 const tCues = computed(
   () => (current.value && locale.value[current.value.id]?.coaching_cues) || current.value?.coaching_cues || []
@@ -258,6 +282,7 @@ function syncUrl() {
   if (state.q) p.set('q', state.q);
   if (state.lang !== 'en') p.set('lang', state.lang);
   if (state.media) p.set('media', state.media);
+  if (state.model) p.set('model', state.model);
   if (state.equipment.length) p.set('equipment', state.equipment.join(','));
   if (state.muscles.length) p.set('muscles', state.muscles.join(','));
   if (state.role !== 'primary') p.set('role', state.role);
@@ -272,7 +297,8 @@ function readUrl() {
   state.q = p.get('q') ?? '';
   state.lang = LANGS[p.get('lang') ?? ''] ? p.get('lang')! : 'en';
   const m = p.get('media');
-  state.media = m === 'video' || m === 'none' ? m : '';
+  state.media = m === 'video' ? 'video' : m === 'novideo' || m === 'none' ? 'novideo' : '';
+  state.model = p.get('model') === 'male' ? 'male' : p.get('model') === 'female' ? 'female' : '';
   state.equipment = (p.get('equipment') ?? '').split(',').filter(Boolean);
   state.muscles = (p.get('muscles') ?? '').split(',').filter(Boolean);
   state.role = p.get('role') === 'any' ? 'any' : 'primary';
@@ -281,7 +307,7 @@ function readUrl() {
   return p.get('ex');
 }
 watch(
-  () => [state.q, state.lang, state.media, state.equipment, state.muscles, state.role, state.figure, state.selects],
+  () => [state.q, state.lang, state.media, state.model, state.equipment, state.muscles, state.role, state.figure, state.selects],
   () => {
     limit.value = PAGE;
     syncUrl();
@@ -293,7 +319,15 @@ watch(
 const sentinel = ref<HTMLElement | null>(null);
 let io: IntersectionObserver | null = null;
 
+let ro: ResizeObserver | null = null;
 onMounted(async () => {
+  showMap.value = window.matchMedia('(min-width: 861px)').matches;
+  if (toolbar.value && root.value && typeof ResizeObserver !== 'undefined') {
+    const apply = () => root.value?.style.setProperty('--tb-h', `${toolbar.value?.offsetHeight ?? 110}px`);
+    ro = new ResizeObserver(apply);
+    ro.observe(toolbar.value);
+    apply();
+  }
   document.addEventListener('click', onDocClick);
   document.addEventListener('keydown', onKey);
   const ex = readUrl();
@@ -319,82 +353,29 @@ onMounted(async () => {
 });
 onBeforeUnmount(() => {
   io?.disconnect();
+  ro?.disconnect();
   document.removeEventListener('click', onDocClick);
   document.removeEventListener('keydown', onKey);
 });
 </script>
 
 <template>
-  <div class="xb">
-    <div class="xb-toolbar">
+  <div ref="root" class="xb">
+    <div ref="toolbar" class="xb-toolbar">
       <div class="tb-row main">
         <div class="search">
           <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
         </div>
-        <div class="pop">
-          <button
-            type="button"
-            class="pop-btn"
-            :class="{ on: state.muscles.length || openPanel === 'muscles' }"
-            :aria-expanded="openPanel === 'muscles'"
-            @click="togglePanel('muscles')"
-          >
-            Muscles <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span
-            ><span class="caret" aria-hidden="true">▾</span>
-          </button>
-          <div v-if="openPanel === 'muscles'" class="panel panel-muscles">
-            <div class="panel-head">
-              <div class="seg small" role="group" aria-label="Figure">
-                <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
-                <button type="button" :aria-pressed="state.figure === 'female'" @click="state.figure = 'female'">Female</button>
-              </div>
-              <div class="seg small" role="group" aria-label="Muscle role">
-                <button type="button" :aria-pressed="state.role === 'primary'" @click="state.role = 'primary'">Primary only</button>
-                <button type="button" :aria-pressed="state.role === 'any'" @click="state.role = 'any'">Primary + secondary</button>
-              </div>
-            </div>
-            <BodyMap
-              :figure="state.figure"
-              mode="filter"
-              :selected="state.muscles"
-              :available="availableMuscles"
-              @toggle="(m) => toggle(state.muscles, m)"
-            />
-            <details class="list-pick">
-              <summary>Choose from a list instead</summary>
-              <div class="list-grid">
-                <label v-for="m in MUSCLES" :key="m" class="list-row">
-                  <span class="check">
-                    <input
-                      type="checkbox"
-                      :checked="state.muscles.includes(m)"
-                      :disabled="!muscleCounts.get(m) && !state.muscles.includes(m)"
-                      @change="toggle(state.muscles, m)"
-                    />
-                    <span class="name">{{ m }}</span>
-                  </span>
-                  <span class="muted">{{ muscleCounts.get(m) ?? 0 }}</span>
-                </label>
-              </div>
-            </details>
-            <template v-if="undrawnMuscles.length">
-            <p class="muted small chips-label">Not drawn on the body map:</p>
-            <div class="chips">
-              <button
-                v-for="m in undrawnMuscles"
-                :key="m"
-                type="button"
-                class="chip-btn"
-                :aria-pressed="state.muscles.includes(m)"
-                :disabled="!muscleCounts.get(m)"
-                @click="toggle(state.muscles, m)"
-              >
-                {{ m }}
-              </button>
-            </div>
-            </template>
-          </div>
-        </div>
+        <button
+          type="button"
+          class="pop-btn"
+          :class="{ on: state.muscles.length || showMap }"
+          :aria-expanded="showMap"
+          @click="showMap = !showMap"
+        >
+          Muscle map <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span
+          ><span class="caret" aria-hidden="true">{{ showMap ? '◀' : '▶' }}</span>
+        </button>
 
         <div class="pop">
           <button
@@ -445,10 +426,19 @@ onBeforeUnmount(() => {
           </select>
         </label>
 
-        <div class="seg small" role="group" aria-label="Media">
+        <div class="seg small" role="group" aria-label="Video">
           <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
-          <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">With video</button>
-          <button type="button" :aria-pressed="state.media === 'none'" @click="state.media = 'none'">No media</button>
+          <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">
+            With video <span class="n">{{ mediaCounts.get('video') ?? 0 }}</span>
+          </button>
+          <button type="button" :aria-pressed="state.media === 'novideo'" @click="state.media = 'novideo'">
+            No video <span class="n">{{ mediaCounts.get('novideo') ?? 0 }}</span>
+          </button>
+        </div>
+        <div class="seg small" role="group" aria-label="Model in the video">
+          <button type="button" :aria-pressed="state.model === ''" @click="state.model = ''">Any model</button>
+          <button type="button" :aria-pressed="state.model === 'male'" @click="state.model = 'male'">Male</button>
+          <button type="button" :aria-pressed="state.model === 'female'" @click="state.model = 'female'">Female</button>
         </div>
 
         <button v-if="activeCount" type="button" class="link reset" @click="reset">Reset ({{ activeCount }})</button>
@@ -464,11 +454,72 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <div class="xb-layout" :class="{ 'map-open': showMap }">
+      <aside v-show="showMap" class="xb-side" aria-label="Muscle map">
+        <div class="side-head">
+          <h2>Muscle map</h2>
+          <button type="button" class="link" @click="showMap = false">Hide ◀</button>
+        </div>
+<div class="panel-head">
+          <div class="seg small" role="group" aria-label="Figure">
+            <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
+            <button type="button" :aria-pressed="state.figure === 'female'" @click="state.figure = 'female'">Female</button>
+          </div>
+          <div class="seg small" role="group" aria-label="Muscle role">
+            <button type="button" :aria-pressed="state.role === 'primary'" @click="state.role = 'primary'">Primary only</button>
+            <button type="button" :aria-pressed="state.role === 'any'" @click="state.role = 'any'">Primary + secondary</button>
+          </div>
+        </div>
+        <BodyMap
+          :figure="state.figure"
+          mode="filter"
+          :selected="state.muscles"
+          :available="availableMuscles"
+          @toggle="(m) => toggle(state.muscles, m)"
+        />
+        <details class="list-pick">
+          <summary>Choose from a list instead</summary>
+          <div class="list-grid">
+            <label v-for="m in MUSCLES" :key="m" class="list-row">
+              <span class="check">
+                <input
+                  type="checkbox"
+                  :checked="state.muscles.includes(m)"
+                  :disabled="!muscleCounts.get(m) && !state.muscles.includes(m)"
+                  @change="toggle(state.muscles, m)"
+                />
+                <span class="name">{{ m }}</span>
+              </span>
+              <span class="muted">{{ muscleCounts.get(m) ?? 0 }}</span>
+            </label>
+          </div>
+        </details>
+        <template v-if="undrawnMuscles.length">
+        <p class="muted small chips-label">Not drawn on the body map:</p>
+        <div class="chips">
+          <button
+            v-for="m in undrawnMuscles"
+            :key="m"
+            type="button"
+            class="chip-btn"
+            :aria-pressed="state.muscles.includes(m)"
+            :disabled="!muscleCounts.get(m)"
+            @click="toggle(state.muscles, m)"
+          >
+            {{ m }}
+          </button>
+        </div>
+        </template>
+      </aside>
+
     <section class="xb-results" aria-live="polite">
       <p v-if="loading" class="muted">Loading exercises…</p>
       <p v-else-if="error" class="muted">{{ error }}</p>
       <template v-else>
         <p class="muted count">{{ filtered.length.toLocaleString() }} of {{ all.length.toLocaleString() }} exercises</p>
+        <p v-if="state.media === 'novideo'" class="muted small hint">
+          These exercises have no video yet. Open one and choose <b>Add a video</b> to send yours as a pull request.
+        </p>
         <ul class="grid">
           <li v-for="e in visible" :key="e.id" class="card">
             <button type="button" @click="open(e)">
@@ -479,6 +530,8 @@ onBeforeUnmount(() => {
                   <span>{{ e.taxonomy.primary_muscles.join(', ') }}</span>
                 </div>
                 <span v-if="hasVideo(e)" class="badge">▶ Video</span>
+                <span v-else-if="e.media?.youtube_url" class="badge">▶ YouTube</span>
+                <span v-else class="badge none">No video</span>
               </div>
               <div class="card-body">
                 <h3>{{ tName(e) }}</h3>
@@ -494,14 +547,25 @@ onBeforeUnmount(() => {
       </template>
       <div ref="sentinel" class="sentinel" aria-hidden="true" />
     </section>
+    </div>
 
     <dialog ref="dialog" class="xb-dialog" aria-labelledby="xb-title" @close="close" @click.self="dialog?.close()">
       <div v-if="current" class="detail">
         <button type="button" class="close" aria-label="Close" @click="dialog?.close()">✕</button>
         <div class="viewer">
-          <div class="media-box" :class="view.orient">
+          <div class="media-box" :class="[view.orient, { yt: view.kind === 'youtube' }]">
+            <iframe
+              v-if="view.kind === 'youtube' && yt"
+              :key="current.id + 'yt'"
+              :src="youtubeEmbedUrl(yt)"
+              :title="`${tName(current)} on YouTube`"
+              allow="encrypted-media; picture-in-picture; fullscreen"
+              referrerpolicy="strict-origin-when-cross-origin"
+              loading="lazy"
+              allowfullscreen
+            />
             <video
-              v-if="view.kind === 'video' && src"
+              v-else-if="view.kind === 'video' && src"
               :key="src"
               :src="src"
               controls
@@ -514,12 +578,13 @@ onBeforeUnmount(() => {
             <div v-else class="ph big">
               <span class="ph-icon" v-html="icon(current.taxonomy.equipment, 64)" />
               <span>No video yet</span>
+              <a class="add-video" :href="withBase(`/contribute?edit=${current.id}#media`)">＋ Add a video</a>
             </div>
           </div>
           <div v-if="kinds.length" class="controls">
             <div class="seg small" role="group" aria-label="Media type">
               <button v-for="k in kinds" :key="k" type="button" :aria-pressed="view.kind === k" @click="view.kind = k">
-                {{ k === 'video' ? 'Video' : k === 'animation' ? 'Animation' : 'Image' }}
+                {{ k === 'video' ? 'Video' : k === 'animation' ? 'Animation' : k === 'image' ? 'Image' : 'YouTube' }}
               </button>
             </div>
             <div v-if="orients.length > 1" class="seg small" role="group" aria-label="Orientation">
@@ -528,6 +593,10 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </div>
+          <p v-if="view.kind === 'youtube' && yt" class="muted small yt-credit">
+            Video on YouTube<template v-if="ytClip"> ({{ ytClip }})</template>.
+            <a :href="youtubeWatchUrl(yt)" target="_blank" rel="noopener noreferrer">Open on YouTube ↗</a>
+          </p>
           <div class="detail-map">
             <div class="detail-map-header">
               <span class="detail-map-title">Target muscles</span>
@@ -733,9 +802,6 @@ select:focus {
   border-radius: 12px;
   box-shadow: var(--vp-shadow-3);
   padding: 14px;
-}
-.panel-muscles {
-  width: 400px;
 }
 .panel-equipment {
   width: 420px;
@@ -1014,6 +1080,18 @@ select:focus {
   max-width: 100%;
   max-height: 62vh;
 }
+.media-box.yt {
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+}
+.media-box iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.yt-credit {
+  margin: 8px 0 0;
+}
 .ph.big {
   color: #9aa3b2;
   padding: 48px;
@@ -1225,8 +1303,62 @@ select:focus {
   align-items: center;
   gap: 6px;
 }
-.panel-muscles {
-  max-height: 75vh;
+
+/* muscle map pane beside the results */
+.xb-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.xb-layout.map-open {
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+.xb-side {
+  position: sticky;
+  top: calc(var(--vp-nav-height) + var(--tb-h, 110px) + 12px);
+  max-height: calc(100vh - var(--vp-nav-height) - var(--tb-h, 110px) - 28px);
   overflow: auto;
+  background: var(--vp-c-bg-soft);
+  border-radius: var(--r);
+  padding: 12px 14px;
+}
+.side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.side-head h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 16px;
+}
+.seg .n {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-left: 3px;
+}
+.hint {
+  margin: 0 0 12px;
+}
+.badge.none {
+  background: var(--vp-c-default-soft);
+  color: var(--vp-c-text-2);
+}
+.add-video {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (max-width: 860px) {
+  .xb-layout.map-open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .xb-side {
+    position: static;
+    max-height: none;
+  }
 }
 </style>

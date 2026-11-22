@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import { withBase } from 'vitepress';
 import BodyMap from './BodyMap.vue';
 import ListEditor from './ListEditor.vue';
@@ -25,7 +25,9 @@ import {
   MOVEMENT_PLANES,
   REHAB_JOINTS,
   SCHEMA_REF,
+  youtubeProblems,
 } from '../../scripts/lib/exercise-form.mjs';
+import { parseYouTube, formatTime } from '../../scripts/lib/youtube.mjs';
 
 /**
  * Builds a valid exercise.json: it computes the ID, folder and media file names from the same rules
@@ -114,6 +116,7 @@ const problems = computed(() => {
   if (!form.equipment) list.push('Pick the equipment.');
   if (form.primary.length === 0) list.push('Pick at least one primary muscle.');
   if (!stepsOk) list.push('Write at least one step (5 or more characters).');
+  list.push(...youtubeProblems(form));
   const covered =
     /^(Missing id|id must look like|Invalid equipment|Missing or invalid 'name'|'steps' must be|At least one primary muscle)/;
   for (const p of validateExercise(exercise.value, checkContext)) {
@@ -140,6 +143,13 @@ const warnings = computed(() => {
 });
 const ready = computed(() => problems.value.length === 0 && !!folder.value);
 
+const storedLink = computed(() => exercise.value.media?.youtube_url ?? '');
+const linkClip = computed(() => {
+  const p = storedLink.value ? parseYouTube(storedLink.value) : null;
+  if (!p) return '';
+  if (p.start == null && p.end == null) return 'Plays the whole video.';
+  return `Plays from ${formatTime(p.start ?? 0)}${p.end != null ? ` to ${formatTime(p.end)}` : ' to the end'}.`;
+});
 const mediaM = computed(() => (folder.value ? mediaFileNames(folder.value, 'm') : null));
 const mediaF = computed(() => (folder.value ? mediaFileNames(folder.value, 'f') : null));
 
@@ -294,6 +304,10 @@ onMounted(async () => {
   }
   base.value = source;
   Object.assign(form, exerciseToForm(source));
+  if (location.hash === '#media') {
+    await nextTick();
+    document.getElementById('media')?.scrollIntoView({ block: 'start' });
+  }
 });
 </script>
 
@@ -475,12 +489,13 @@ onMounted(async () => {
           <ListEditor v-model="form.cues" item-label="Cue" add-label="+ Add cue" :rows="2" />
         </section>
 
-        <section v-if="mediaM && mediaF">
+        <section v-if="mediaM && mediaF" id="media">
           <h2>7. Videos and images <span class="muted small">(optional)</span></h2>
           <p>
             A video is the best demonstration; without one, a still image is fine. Add the files to the exercise folder, next to
             <code>exercise.json</code>, with exactly these names. Add the version you have: the letter in each name says who is shown,
-            <b>m</b> for a male model and <b>f</b> for a female model, and apps use it to show the right one.
+            <b>m</b> for a male model and <b>f</b> for a female model, and apps use it to show the right one. No video of your own?
+            You can link a YouTube video instead, in <a href="#youtube">step 8</a>.
           </p>
           <p class="muted small">
             <template v-if="editing">
@@ -593,6 +608,32 @@ onMounted(async () => {
             See the <a :href="withBase('/guide/contributing')">contributing guide</a> and the
             <a :href="withBase('/guide/media')">media standards</a>.
           </p>
+        </section>
+
+        <section id="youtube">
+          <h2>8. YouTube link <span class="muted small">(optional)</span></h2>
+          <p>
+            Link a YouTube video that shows this exercise. The site and the apps play it from the start time you give, so a long video
+            can point at just the minute that matters. Only link videos you have the right to link; the link is shown as the credit.
+          </p>
+          <label class="field">
+            <span>YouTube address</span>
+            <input v-model="form.youtube.url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span>Starts at</span>
+              <input v-model="form.youtube.start" type="text" placeholder="1:02" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Stops at</span>
+              <input v-model="form.youtube.end" type="text" placeholder="2:01" autocomplete="off" />
+            </label>
+          </div>
+          <p v-if="storedLink" class="muted small">
+            {{ linkClip }} Stored in <code>exercise.json</code> as one link: <CopyText :text="storedLink" what="link" />
+          </p>
+          <p v-else class="muted small">Times are optional. Write them as 1:02 or 62 seconds.</p>
         </section>
 
         <section>

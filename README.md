@@ -179,6 +179,16 @@ Media files are **auto-discovered by filename convention** inside each exercise 
 - **Duration:** 5 to 15 seconds (shows 1–2 complete repetitions)
 - **Metadata:** `pnpm media` writes the exercise ID, name, model and license into each MP4's title, comment and copyright tags, so a video can still be identified if it is renamed or copied out of its folder
 
+### Linking a YouTube video (optional)
+
+Besides our own files, an exercise can link one YouTube video in its `media` block. The link is a single address that carries the whole clip, so nothing else has to be kept in sync:
+
+```json
+"media": { "youtube_url": "https://youtu.be/dQw4w9WgXcQ?t=62&end=121" }
+```
+
+`t` is where the exercise starts and `end` is where it stops, in seconds, so this plays 1:02 to 2:01 of a longer video. A plain browser only honours the start; the browse site and the apps read both. Only link videos you have the right to link, and the owner must allow embedding. The [exercise generator](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/contribute) builds the link from a pasted address and start and end times. In `dist/exercises.json` the link is published as `media.youtube_url`, with its parts in `media.youtube` (`id`, `start`, `end`).
+
 ## Media Optimization CLI
 
 Whenever you add or update raw video files, run the automated media optimizer:
