@@ -1,0 +1,92 @@
+{
+  "muscle": {
+    "abdominals": "Коремни мускули",
+    "abductors": "Абдуктори",
+    "adductors": "Аддуктори",
+    "biceps": "Бицепс",
+    "calves": "Прасци",
+    "chest": "Гърди",
+    "forearms": "Предмишници",
+    "glutes": "Седалище",
+    "hamstrings": "Задно бедро",
+    "lats": "Широк гръбен мускул",
+    "lower back": "Кръст",
+    "middle back": "Средна част на гърба",
+    "neck": "Врат",
+    "quadriceps": "Квадрицепс",
+    "shoulders": "Рамене",
+    "traps": "Трапец",
+    "triceps": "Трицепс"
+  },
+  "equipment": {
+    "barbell": "Щанга",
+    "dumbbell": "Дъмбел",
+    "kettlebells": "Пудовки",
+    "cable": "Скрипец",
+    "machine": "Машина",
+    "bands": "Ластици",
+    "body only": "Собствено тегло",
+    "medicine ball": "Медицинска топка",
+    "exercise ball": "Фитнес топка",
+    "foam roll": "Фоумролер",
+    "e-z curl bar": "Крив лост (EZ)",
+    "other": "Друго"
+  },
+  "level": {
+    "beginner": "Начално ниво",
+    "intermediate": "Средно ниво",
+    "expert": "Експерт"
+  },
+  "mechanic": {
+    "compound": "Многоставно",
+    "isolation": "Изолиращо"
+  },
+  "force": {
+    "push": "Избутване",
+    "pull": "Издърпване",
+    "static": "Статично"
+  },
+  "category": {
+    "strength": "Силови",
+    "cardio": "Кардио",
+    "powerlifting": "Силов трибой",
+    "olympic weightlifting": "Вдигане на тежести",
+    "strongman": "Стронгмен",
+    "plyometrics": "Плиометрия",
+    "stretching": "Стречинг",
+    "back": "Назад",
+    "chest": "Гърди",
+    "shoulders": "Рамене",
+    "neck": "Врат",
+    "waist": "Талия"
+  },
+  "body_part": {
+    "abdominals": "Коремни мускули",
+    "abductors": "Абдуктори",
+    "calves": "Прасци",
+    "chest": "Гърди",
+    "forearms": "Предмишници",
+    "glutes": "Седалище",
+    "hamstrings": "Задно бедро",
+    "lower back": "Кръст",
+    "middle back": "Средна част на гърба",
+    "neck": "Врат",
+    "shoulders": "Рамене",
+    "back": "Назад",
+    "cardio": "Кардио",
+    "general": "Общи",
+    "hips": "Ханш",
+    "waist": "Талия",
+    "quads": "Квадрицепс",
+    "upper back": "Горна част на гърба"
+  },
+  "modality": {
+    "weight_reps": "Тежест и повторения",
+    "reps_only": "Повторения",
+    "bodyweight_reps": "Собствено тегло (+/− тежест)",
+    "weight_duration": "Тежест и продължителност (задържане с тежест)",
+    "weight_distance": "Тежест и разстояние (пренасяне)",
+    "duration": "Продължителност",
+    "duration_distance": "Продължителност и разстояние"
+  }
+}

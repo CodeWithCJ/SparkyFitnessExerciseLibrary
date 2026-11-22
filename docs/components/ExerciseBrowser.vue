@@ -57,6 +57,20 @@ const LANGS: Record<string, string> = {
   hi: 'हिन्दी',
   zh: '中文',
   ko: '한국어',
+  ar: 'العربية',
+  bg: 'Български',
+  cs: 'Čeština',
+  de: 'Deutsch',
+  hu: 'Magyar',
+  lv: 'Latviešu',
+  'nb-NO': 'Norsk bokmål',
+  nl: 'Nederlands',
+  'pt-BR': 'Português (Brasil)',
+  ru: 'Русский',
+  sk: 'Slovenčina',
+  sv: 'Svenska',
+  'yue-Hant': '粵語',
+  'zh-Hant': '繁體中文',
 };
 const MUSCLES = [
   'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest', 'forearms', 'glutes',
@@ -78,6 +92,9 @@ const all = ref<Exercise[]>([]);
 const loading = ref(true);
 const error = ref('');
 const locale = ref<Record<string, LocaleEntry>>({});
+type Labels = Record<string, Record<string, string>>;
+const labelsEn = ref<Labels>({});
+const labelsLang = ref<Labels>({});
 
 const state = reactive({
   q: '',
@@ -92,12 +109,14 @@ const state = reactive({
 });
 const limit = ref(PAGE);
 const showFilters = ref(false);
-const openPanel = ref<'equipment' | null>(null);
 const showMap = ref(false);
 const toolbar = ref<HTMLElement | null>(null);
 const root = ref<HTMLElement | null>(null);
 
 /* ---------- helpers ---------- */
+// A taxonomy value (muscle, equipment, level, ...) in the chosen language, then English, then the raw value.
+const tr = (section: string, value?: string | null) =>
+  value ? labelsLang.value[section]?.[value] ?? labelsEn.value[section]?.[value] ?? value.replace(/_/g, ' ') : '—';
 const media = (p?: string | null) => (p ? withBase('/' + p) : '');
 const label = (v?: string | null) => (v ? v.replace(/_/g, ' ') : '—');
 const tName = (e: Exercise) => locale.value[e.id]?.name || e.name;
@@ -169,6 +188,7 @@ const muscleCounts = computed(() =>
   )
 );
 const mediaCounts = computed(() => countsFor('media', (e) => (hasVideo(e) ? 'video' : 'novideo')));
+const sideCount = computed(() => state.muscles.length + state.equipment.length);
 const availableMuscles = computed(() => MUSCLES.filter((m) => (muscleCounts.value.get(m) ?? 0) > 0));
 const undrawnMuscles = MUSCLES.filter((m) => !MAP_MUSCLES.has(m));
 const activeCount = computed(
@@ -184,19 +204,6 @@ function toggle(list: string[], v: string) {
   const i = list.indexOf(v);
   if (i >= 0) list.splice(i, 1);
   else list.push(v);
-}
-function togglePanel(panel: 'equipment') {
-  openPanel.value = openPanel.value === panel ? null : panel;
-}
-// Close the open panel on an outside click or Escape. composedPath() is read at dispatch time, so it
-// still works when Vue has already re-rendered the clicked element away.
-function onDocClick(e: MouseEvent) {
-  if (!openPanel.value) return;
-  const inside = e.composedPath().some((el) => (el as Element).classList?.contains('pop'));
-  if (!inside) openPanel.value = null;
-}
-function onKey(e: KeyboardEvent) {
-  if (e.key === 'Escape') openPanel.value = null;
 }
 function reset() {
   state.q = '';
@@ -265,7 +272,20 @@ watch(
 );
 
 /* ---------- language ---------- */
+async function loadLabels(lang: string) {
+  const get = async (code: string): Promise<Labels> => {
+    try {
+      const res = await fetch(withBase(`/locales/${code}/taxonomy.json`));
+      return res.ok ? await res.json() : {};
+    } catch {
+      return {};
+    }
+  };
+  if (!Object.keys(labelsEn.value).length) labelsEn.value = await get('en');
+  labelsLang.value = lang === 'en' ? {} : await get(lang);
+}
 async function loadLocale(lang: string) {
+  await loadLabels(lang);
   if (lang === 'en') {
     locale.value = {};
     return;
@@ -330,8 +350,6 @@ onMounted(async () => {
     ro.observe(toolbar.value);
     apply();
   }
-  document.addEventListener('click', onDocClick);
-  document.addEventListener('keydown', onKey);
   const ex = readUrl();
   try {
     const res = await fetch(withBase('/data/exercises.json'));
@@ -356,38 +374,25 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   io?.disconnect();
   ro?.disconnect();
-  document.removeEventListener('click', onDocClick);
-  document.removeEventListener('keydown', onKey);
 });
 </script>
 
 <template>
   <div ref="root" class="xb">
-    <div ref="toolbar" class="xb-toolbar">
-      <div class="tb-row main">
-        <button
-          type="button"
-          class="pop-btn"
-          :class="{ on: state.muscles.length || showMap }"
-          :aria-expanded="showMap"
-          @click="showMap = !showMap"
-        >
-          Muscle map <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span
-          ><span class="caret" aria-hidden="true">{{ showMap ? '◀' : '▶' }}</span>
-        </button>
-
-        <div class="pop">
-          <button
-            type="button"
-            class="pop-btn"
-            :class="{ on: state.equipment.length || openPanel === 'equipment' }"
-            :aria-expanded="openPanel === 'equipment'"
-            @click="togglePanel('equipment')"
-          >
-            Equipment <span v-if="state.equipment.length" class="pill">{{ state.equipment.length }}</span
-            ><span class="caret" aria-hidden="true">▾</span>
-          </button>
-          <div v-if="openPanel === 'equipment'" class="panel panel-equipment">
+    <div class="xb-layout" :class="{ 'map-open': showMap }">
+      <aside v-show="showMap" class="xb-side" aria-label="Muscles, equipment and language">
+        <div class="side-head">
+          <h2>Filters</h2>
+          <button type="button" class="link" @click="showMap = false">Hide ◀</button>
+        </div>
+        <details class="side-sec" open>
+          <summary>Language</summary>
+          <select v-model="state.lang" aria-label="Language" class="lang">
+            <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
+          </select>
+        </details>
+        <details class="side-sec" open>
+          <summary>Equipment <span v-if="state.equipment.length" class="pill">{{ state.equipment.length }}</span></summary>
             <div class="equip">
               <button
                 v-for="o in equipmentOptions"
@@ -396,72 +401,17 @@ onBeforeUnmount(() => {
                 class="equip-tile"
                 :aria-pressed="state.equipment.includes(o.value)"
                 :disabled="!o.count && !state.equipment.includes(o.value)"
-                :title="`${o.value} (${o.count})`"
+                :title="`${tr('equipment', o.value)} (${o.count})`"
                 @click="toggle(state.equipment, o.value)"
               >
                 <span class="equip-icon" v-html="icon(o.value, 26)" />
-                <span class="equip-name">{{ o.value }}</span>
+                <span class="equip-name">{{ tr('equipment', o.value) }}</span>
                 <span class="equip-count">{{ o.count }}</span>
               </button>
             </div>
-          </div>
-        </div>
-
-        <select v-model="state.lang" aria-label="Language" class="lang">
-          <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
-        </select>
-        <div class="search">
-          <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
-        </div>
-        <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
-          Filters<span v-if="activeCount"> ({{ activeCount }})</span>
-        </button>
-      </div>
-
-      <div class="tb-row filters" :class="{ open: showFilters }" role="group" aria-label="Filters">
-        <label v-for="s in SELECTS" :key="s.key" class="sel" :class="{ on: state.selects[s.key] }">
-          <select v-model="state.selects[s.key]" :aria-label="s.label">
-            <option value="">{{ s.label }}</option>
-            <option v-for="o in selectOptions[s.key]" :key="o.value" :value="o.value" :disabled="!o.count">
-              {{ label(o.value) }} ({{ o.count }})
-            </option>
-          </select>
-        </label>
-
-        <div class="seg small" role="group" aria-label="Video">
-          <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
-          <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">
-            With video <span class="n">{{ mediaCounts.get('video') ?? 0 }}</span>
-          </button>
-          <button type="button" :aria-pressed="state.media === 'novideo'" @click="state.media = 'novideo'">
-            No video <span class="n">{{ mediaCounts.get('novideo') ?? 0 }}</span>
-          </button>
-        </div>
-        <div class="seg small" role="group" aria-label="Model in the video">
-          <button type="button" :aria-pressed="state.model === ''" @click="state.model = ''">Any model</button>
-          <button type="button" :aria-pressed="state.model === 'male'" @click="state.model = 'male'">Male</button>
-          <button type="button" :aria-pressed="state.model === 'female'" @click="state.model = 'female'">Female</button>
-        </div>
-
-        <button v-if="activeCount" type="button" class="link reset" @click="reset">Reset ({{ activeCount }})</button>
-      </div>
-
-      <div v-if="state.muscles.length || state.equipment.length" class="tb-row active-row">
-        <button v-for="m in state.muscles" :key="'m' + m" type="button" class="chip-btn on" @click="toggle(state.muscles, m)">
-          {{ m }} ✕
-        </button>
-        <button v-for="e in state.equipment" :key="'e' + e" type="button" class="chip-btn on" @click="toggle(state.equipment, e)">
-          {{ e }} ✕
-        </button>
-      </div>
-    </div>
-
-    <div class="xb-layout" :class="{ 'map-open': showMap }">
-      <aside v-show="showMap" class="xb-side" aria-label="Muscle map">
-        <div class="side-head">
-          <h2>Muscle map</h2>
-          <button type="button" class="link" @click="showMap = false">Hide ◀</button>
-        </div>
+        </details>
+        <details class="side-sec" open>
+          <summary>Muscles <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span></summary>
 <div class="panel-head">
           <div class="seg small" role="group" aria-label="Figure">
             <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
@@ -490,7 +440,7 @@ onBeforeUnmount(() => {
                   :disabled="!muscleCounts.get(m) && !state.muscles.includes(m)"
                   @change="toggle(state.muscles, m)"
                 />
-                <span class="name">{{ m }}</span>
+                <span class="name">{{ tr('muscle', m) }}</span>
               </span>
               <span class="muted">{{ muscleCounts.get(m) ?? 0 }}</span>
             </label>
@@ -508,11 +458,71 @@ onBeforeUnmount(() => {
             :disabled="!muscleCounts.get(m)"
             @click="toggle(state.muscles, m)"
           >
-            {{ m }}
+            {{ tr('muscle', m) }}
           </button>
         </div>
         </template>
+        </details>
       </aside>
+
+      <div class="xb-main">
+      <div ref="toolbar" class="xb-toolbar">
+        <div class="tb-row main">
+          <button
+            type="button"
+            class="pop-btn"
+            :class="{ on: sideCount || showMap }"
+            :aria-expanded="showMap"
+            @click="showMap = !showMap"
+          >
+            Muscles &amp; equipment <span v-if="sideCount" class="pill">{{ sideCount }}</span
+            ><span class="caret" aria-hidden="true">{{ showMap ? '◀' : '▶' }}</span>
+          </button>
+          <div class="search">
+            <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
+          </div>
+          <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
+            Filters<span v-if="activeCount"> ({{ activeCount }})</span>
+          </button>
+        </div>
+
+        <div class="tb-row filters" :class="{ open: showFilters }" role="group" aria-label="Filters">
+          <label v-for="s in SELECTS" :key="s.key" class="sel" :class="{ on: state.selects[s.key] }">
+            <select v-model="state.selects[s.key]" :aria-label="s.label">
+              <option value="">{{ s.label }}</option>
+              <option v-for="o in selectOptions[s.key]" :key="o.value" :value="o.value" :disabled="!o.count">
+                {{ tr(s.key, o.value) }} ({{ o.count }})
+              </option>
+            </select>
+          </label>
+
+          <div class="seg small" role="group" aria-label="Video">
+            <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
+            <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">
+              With video <span class="n">{{ mediaCounts.get('video') ?? 0 }}</span>
+            </button>
+            <button type="button" :aria-pressed="state.media === 'novideo'" @click="state.media = 'novideo'">
+              No video <span class="n">{{ mediaCounts.get('novideo') ?? 0 }}</span>
+            </button>
+          </div>
+          <div class="seg small" role="group" aria-label="Model in the video">
+            <button type="button" :aria-pressed="state.model === ''" @click="state.model = ''">Any model</button>
+            <button type="button" :aria-pressed="state.model === 'male'" @click="state.model = 'male'">Male</button>
+            <button type="button" :aria-pressed="state.model === 'female'" @click="state.model = 'female'">Female</button>
+          </div>
+
+          <button v-if="activeCount" type="button" class="link reset" @click="reset">Reset ({{ activeCount }})</button>
+        </div>
+
+        <div v-if="state.muscles.length || state.equipment.length" class="tb-row active-row">
+          <button v-for="m in state.muscles" :key="'m' + m" type="button" class="chip-btn on" @click="toggle(state.muscles, m)">
+            {{ tr('muscle', m) }} ✕
+          </button>
+          <button v-for="e in state.equipment" :key="'e' + e" type="button" class="chip-btn on" @click="toggle(state.equipment, e)">
+            {{ tr('equipment', e) }} ✕
+          </button>
+        </div>
+      </div>
 
     <section class="xb-results" aria-live="polite">
       <p v-if="loading" class="muted">Loading exercises…</p>
@@ -529,7 +539,7 @@ onBeforeUnmount(() => {
                 <img v-if="e.media?.thumbnail_path" :src="media(e.media.thumbnail_path)" :alt="tName(e)" loading="lazy" />
                 <div v-else class="ph">
                   <span class="ph-icon" v-html="icon(e.taxonomy.equipment, 40)" />
-                  <span>{{ e.taxonomy.primary_muscles.join(', ') }}</span>
+                  <span>{{ e.taxonomy.primary_muscles.map((m) => tr('muscle', m)).join(', ') }}</span>
                 </div>
                 <span v-if="hasVideo(e)" class="badge">▶ Video</span>
                 <span v-else-if="e.media?.youtube_url" class="badge">▶ YouTube</span>
@@ -539,7 +549,7 @@ onBeforeUnmount(() => {
                 <h3>{{ tName(e) }}</h3>
                 <p class="meta">
                   <span class="mini-icon" v-html="icon(e.taxonomy.equipment, 14)" />
-                  {{ e.taxonomy.equipment }} · {{ e.taxonomy.level }}
+                  {{ tr('equipment', e.taxonomy.equipment) }} · {{ tr('level', e.taxonomy.level) }}
                 </p>
               </div>
             </button>
@@ -549,6 +559,7 @@ onBeforeUnmount(() => {
       </template>
       <div ref="sentinel" class="sentinel" aria-hidden="true" />
     </section>
+      </div>
     </div>
 
     <dialog ref="dialog" class="xb-dialog" aria-labelledby="xb-title" @close="close" @click.self="dialog?.close()">
@@ -632,21 +643,21 @@ onBeforeUnmount(() => {
           <p v-if="current.aliases?.length" class="muted">Also: {{ current.aliases.join(', ') }}</p>
 
           <div class="tags">
-            <span class="tag equip-tag"><span v-html="icon(current.taxonomy.equipment, 16)" /> {{ current.taxonomy.equipment }}</span>
-            <span v-for="m in current.taxonomy.primary_muscles" :key="'p' + m" class="tag primary">{{ m }}</span>
-            <span v-for="m in current.taxonomy.secondary_muscles" :key="'s' + m" class="tag secondary">{{ m }}</span>
+            <span class="tag equip-tag"><span v-html="icon(current.taxonomy.equipment, 16)" /> {{ tr('equipment', current.taxonomy.equipment) }}</span>
+            <span v-for="m in current.taxonomy.primary_muscles" :key="'p' + m" class="tag primary">{{ tr('muscle', m) }}</span>
+            <span v-for="m in current.taxonomy.secondary_muscles" :key="'s' + m" class="tag secondary">{{ tr('muscle', m) }}</span>
           </div>
 
           <dl class="attrs">
-            <dt>Category</dt><dd>{{ label(current.taxonomy.category) }}</dd>
-            <dt>Body part</dt><dd>{{ label(current.taxonomy.body_part) }}</dd>
-            <dt>Level</dt><dd>{{ label(current.taxonomy.level) }}</dd>
-            <dt>Mechanic</dt><dd>{{ label(current.taxonomy.mechanic) }}</dd>
-            <dt>Force</dt><dd>{{ label(current.taxonomy.force) }}</dd>
-            <dt>Tracking</dt><dd>{{ label(current.taxonomy.modality) }}</dd>
+            <dt>Category</dt><dd>{{ tr('category', current.taxonomy.category) }}</dd>
+            <dt>Body part</dt><dd>{{ tr('body_part', current.taxonomy.body_part) }}</dd>
+            <dt>Level</dt><dd>{{ tr('level', current.taxonomy.level) }}</dd>
+            <dt>Mechanic</dt><dd>{{ tr('mechanic', current.taxonomy.mechanic) }}</dd>
+            <dt>Force</dt><dd>{{ tr('force', current.taxonomy.force) }}</dd>
+            <dt>Tracking</dt><dd>{{ tr('modality', current.taxonomy.modality) }}</dd>
             <template v-if="current.biomechanics">
-              <dt>Laterality</dt><dd>{{ label(current.biomechanics.laterality) }}</dd>
-              <dt>Plane</dt><dd>{{ label(current.biomechanics.movement_plane) }}</dd>
+              <dt>Laterality</dt><dd>{{ tr('laterality', current.biomechanics.laterality) }}</dd>
+              <dt>Plane</dt><dd>{{ tr('movement_plane', current.biomechanics.movement_plane) }}</dd>
               <dt>Tempo</dt><dd>{{ current.biomechanics.default_tempo || '—' }}</dd>
             </template>
           </dl>
@@ -717,8 +728,8 @@ select:focus {
 /* toolbar: search, filters and active chips stay at the top while the results scroll */
 .xb-toolbar {
   background: var(--vp-c-bg);
-  margin: 0 calc(var(--pad) * -1) 16px;
-  padding: 10px var(--pad) 8px;
+  margin: 0 0 16px;
+  padding: 10px 0 8px;
   border-bottom: 1px solid var(--vp-c-divider);
 }
 @media (min-width: 861px) {
@@ -1313,6 +1324,9 @@ select:focus {
 }
 
 /* muscle map pane beside the results */
+.xb-main {
+  min-width: 0;
+}
 .xb-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1324,8 +1338,8 @@ select:focus {
 }
 .xb-side {
   position: sticky;
-  top: calc(var(--vp-nav-height) + var(--tb-h, 110px) + 12px);
-  max-height: calc(100vh - var(--vp-nav-height) - var(--tb-h, 110px) - 28px);
+  top: calc(var(--vp-nav-height) + 12px);
+  max-height: calc(100vh - var(--vp-nav-height) - 28px);
   overflow: auto;
   background: var(--vp-c-bg-soft);
   border-radius: var(--r);
@@ -1368,5 +1382,36 @@ select:focus {
     position: static;
     max-height: none;
   }
+}
+.side-sec {
+  border-top: 1px solid var(--vp-c-divider);
+  padding: 8px 0;
+}
+.side-sec > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+.side-sec > summary::-webkit-details-marker {
+  display: none;
+}
+.side-sec > summary::before {
+  content: '▸';
+  font-size: 11px;
+  transition: transform 0.15s;
+}
+.side-sec[open] > summary::before {
+  transform: rotate(90deg);
+}
+.xb-side .equip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.xb-side .lang {
+  width: 100%;
 }
 </style>

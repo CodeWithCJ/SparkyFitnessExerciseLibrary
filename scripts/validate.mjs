@@ -40,6 +40,24 @@ const exerciseFolders = fs
 
 let errorCount = 0;
 let warningCount = 0;
+// Labels for the taxonomy values (muscles, equipment, levels, ...) in every language
+const labelsDir = path.join(rootDir, 'locales');
+const taxonomyEn = JSON.parse(fs.readFileSync(path.join(labelsDir, 'en', 'taxonomy.json'), 'utf8'));
+for (const lang of fs.readdirSync(labelsDir)) {
+  const file = path.join(labelsDir, lang, 'taxonomy.json');
+  // Languages with translated exercises (exercises.json) need every label; the others fall back to English
+  const complete = fs.existsSync(path.join(labelsDir, lang, 'exercises.json'));
+  if (lang === 'en' || !fs.existsSync(file)) continue;
+  const labels = JSON.parse(fs.readFileSync(file, 'utf8'));
+  for (const [section, terms] of Object.entries(taxonomyEn)) {
+    for (const term of Object.keys(terms)) {
+      if (complete && !labels[section]?.[term]) {
+        console.error(`❌ locales/${lang}/taxonomy.json is missing ${section}.${term}`);
+        errorCount++;
+      }
+    }
+  }
+}
 const seenIds = new Set();
 const checkContext = { idPattern: ID_PATTERN, validMuscles, validEquipment, validModalities };
 
@@ -69,6 +87,29 @@ for (const folder of exerciseFolders) {
   for (const problem of validateExercise(exercise, checkContext)) {
     console.error(`❌ [${folder}] ${problem}`);
     errorCount++;
+  }
+
+  // 1a. Every taxonomy value needs a label in locales/en/taxonomy.json (the other languages are checked above)
+  const t = exercise.taxonomy ?? {};
+  const used = {
+    category: [t.category],
+    body_part: [t.body_part],
+    equipment: [t.equipment],
+    modality: [t.modality],
+    level: [t.level],
+    mechanic: [t.mechanic],
+    force: [t.force],
+    muscle: [...(t.primary_muscles ?? []), ...(t.secondary_muscles ?? [])],
+    laterality: [exercise.biomechanics?.laterality],
+    movement_plane: [exercise.biomechanics?.movement_plane],
+  };
+  for (const [section, values] of Object.entries(used)) {
+    for (const value of values.filter(Boolean)) {
+      if (!taxonomyEn[section]?.[value]) {
+        console.error(`❌ [${folder}] '${value}' (${section}) has no label in locales/en/taxonomy.json. Add it there and in every other language.`);
+        errorCount++;
+      }
+    }
   }
 
   // 1b. Checks that need the folder or the other exercises

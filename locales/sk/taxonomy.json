@@ -1,0 +1,37 @@
+{
+  "level": {
+    "beginner": "Začiatočník",
+    "intermediate": "Stredne pokročilý"
+  },
+  "mechanic": {
+    "compound": "Komplexný cvik",
+    "isolation": "Izolovaný cvik"
+  },
+  "force": {
+    "push": "Tlak",
+    "pull": "Ťah",
+    "static": "Statické"
+  },
+  "category": {
+    "strength": "Sila",
+    "cardio": "Kardio",
+    "olympic weightlifting": "Vzpieranie",
+    "plyometrics": "Plyometria",
+    "stretching": "Naťahovanie",
+    "back": "Späť"
+  },
+  "body_part": {
+    "back": "Späť",
+    "cardio": "Kardio",
+    "general": "Všeobecné"
+  },
+  "modality": {
+    "weight_reps": "Váha a opakovania",
+    "reps_only": "Opakovania",
+    "bodyweight_reps": "Telesná hmotnosť (+/− závažie)",
+    "weight_duration": "Hmotnosť a trvanie (výdrže so záťažou)",
+    "weight_distance": "Hmotnosť a vzdialenosť (prenášanie)",
+    "duration": "Trvanie",
+    "duration_distance": "Trvanie a vzdialenosť"
+  }
+}

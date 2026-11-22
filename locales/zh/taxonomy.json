@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "腹肌",
+    "abductors": "外展肌",
+    "adductors": "内收肌",
+    "biceps": "二头肌",
+    "calves": "小腿",
+    "chest": "胸肌",
+    "forearms": "前臂",
+    "glutes": "臀部",
+    "hamstrings": "腘绳肌",
+    "lats": "背阔肌",
+    "lower back": "下背",
+    "middle back": "中背",
+    "neck": "颈部",
+    "quadriceps": "股四头肌",
+    "shoulders": "肩部",
+    "traps": "斜方肌",
+    "triceps": "三头肌"
+  },
+  "equipment": {
+    "barbell": "杠铃",
+    "dumbbell": "哑铃",
+    "kettlebells": "壶铃",
+    "cable": "绳索",
+    "machine": "器械",
+    "bands": "弹力带",
+    "body only": "徒手",
+    "medicine ball": "药球",
+    "exercise ball": "健身球",
+    "foam roll": "泡沫轴",
+    "e-z curl bar": "E-Z 曲杆",
+    "other": "其他"
+  },
+  "level": {
+    "beginner": "初学者",
+    "intermediate": "中级",
+    "expert": "高级"
+  },
+  "mechanic": {
+    "compound": "复合",
+    "isolation": "孤立"
+  },
+  "force": {
+    "push": "推",
+    "pull": "拉",
+    "static": "静态",
+    "isometric": "等长收缩",
+    "crush": "挤压"
+  },
+  "category": {
+    "strength": "力量训练",
+    "cardio": "有氧训练",
+    "powerlifting": "力量举",
+    "olympic weightlifting": "奥林匹克举重",
+    "strongman": "壮汉体能训练",
+    "plyometrics": "爆发力训练",
+    "stretching": "拉伸放松",
+    "back": "返回",
+    "chest": "胸肌",
+    "shoulders": "肩部",
+    "neck": "颈部",
+    "waist": "腰围",
+    "upper arms": "上臂",
+    "lower arms": "前臂",
+    "upper legs": "大腿",
+    "lower legs": "小腿",
+    "mobility": "灵活性"
+  },
+  "body_part": {
+    "abdominals": "腹肌",
+    "abductors": "外展肌",
+    "calves": "小腿",
+    "chest": "胸肌",
+    "forearms": "前臂",
+    "glutes": "臀部",
+    "hamstrings": "腘绳肌",
+    "lower back": "下背",
+    "middle back": "中背",
+    "neck": "颈部",
+    "shoulders": "肩部",
+    "back": "返回",
+    "cardio": "有氧训练",
+    "general": "综合类",
+    "hips": "臀围",
+    "waist": "腰围",
+    "quads": "股四头肌",
+    "upper back": "上背",
+    "thighs": "大腿",
+    "upper arms": "上臂",
+    "lower arms": "前臂",
+    "upper legs": "大腿",
+    "lower legs": "小腿"
+  },
+  "modality": {
+    "weight_reps": "重量与次数",
+    "reps_only": "仅次数",
+    "bodyweight_reps": "自重（+/− 体重）",
+    "weight_duration": "重量与时长（负重支撑）",
+    "weight_distance": "重量与距离（负重行走）",
+    "duration": "时长",
+    "duration_distance": "时长与距离"
+  },
+  "laterality": {
+    "bilateral": "双侧",
+    "unilateral_left": "单侧（左）",
+    "unilateral_right": "单侧（右）",
+    "alternating": "交替"
+  },
+  "movement_plane": {
+    "sagittal": "矢状面",
+    "frontal": "冠状面",
+    "transverse": "横断面",
+    "multiplanar": "多平面"
+  }
+}

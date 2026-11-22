@@ -1,0 +1,31 @@
+{
+  "level": {
+    "beginner": "Nybörjare",
+    "intermediate": "Medel"
+  },
+  "mechanic": {
+    "compound": "Flerledsövning",
+    "isolation": "Isolering"
+  },
+  "force": {
+    "push": "Press",
+    "pull": "Drag",
+    "static": "Statisk"
+  },
+  "category": {
+    "strength": "Styrka",
+    "cardio": "Kondition",
+    "powerlifting": "Styrkelyft",
+    "olympic weightlifting": "Olympisk tyngdlyftning",
+    "plyometrics": "Plyometri",
+    "back": "Tillbaka"
+  },
+  "body_part": {
+    "back": "Tillbaka",
+    "cardio": "Kondition",
+    "general": "Allmänt"
+  },
+  "modality": {
+    "reps_only": "Repetitioner"
+  }
+}

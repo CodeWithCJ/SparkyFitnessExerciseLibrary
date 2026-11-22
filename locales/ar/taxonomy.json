@@ -1,0 +1,17 @@
+{
+  "category": {
+    "strength": "قوة",
+    "cardio": "لياقة قلبية",
+    "powerlifting": "رفع القوة",
+    "olympic weightlifting": "رفع الأثقال الأولمبي",
+    "strongman": "تمارين القوة البدنية",
+    "plyometrics": "تمارين بليومترية",
+    "stretching": "إطالة",
+    "back": "رجوع"
+  },
+  "body_part": {
+    "back": "رجوع",
+    "cardio": "لياقة قلبية",
+    "general": "عام"
+  }
+}

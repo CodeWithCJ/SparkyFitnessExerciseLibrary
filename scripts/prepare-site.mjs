@@ -28,6 +28,10 @@ const langs = fs.readdirSync(path.join(root, 'locales')).filter((l) =>
   fs.existsSync(path.join(root, 'locales', l, 'exercises.json'))
 );
 for (const l of langs) copy(`locales/${l}/exercises.json`);
+// Labels (muscles, equipment, ...) exist for more languages than the exercise text does
+for (const l of fs.readdirSync(path.join(root, 'locales'))) {
+  if (fs.existsSync(path.join(root, 'locales', l, 'taxonomy.json'))) copy(`locales/${l}/taxonomy.json`);
+}
 
 const catalog = JSON.parse(fs.readFileSync(path.join(root, 'dist/exercises.json'), 'utf8'));
 const files = new Set();

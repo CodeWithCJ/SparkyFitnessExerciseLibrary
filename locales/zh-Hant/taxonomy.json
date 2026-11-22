@@ -1,0 +1,92 @@
+{
+  "muscle": {
+    "abdominals": "腹肌",
+    "abductors": "外展肌",
+    "adductors": "內收肌",
+    "biceps": "二頭肌",
+    "calves": "小腿",
+    "chest": "胸肌",
+    "forearms": "前臂",
+    "glutes": "臀部",
+    "hamstrings": "腿後肌群",
+    "lats": "背闊肌",
+    "lower back": "下背",
+    "middle back": "中背",
+    "neck": "頸部",
+    "quadriceps": "股四頭肌",
+    "shoulders": "肩部",
+    "traps": "斜方肌",
+    "triceps": "三頭肌"
+  },
+  "equipment": {
+    "barbell": "槓鈴",
+    "dumbbell": "啞鈴",
+    "kettlebells": "壺鈴",
+    "cable": "纜繩",
+    "machine": "器械",
+    "bands": "彈力帶",
+    "body only": "徒手",
+    "medicine ball": "藥球",
+    "exercise ball": "健身球",
+    "foam roll": "泡棉滾筒",
+    "e-z curl bar": "E-Z 曲槓",
+    "other": "其他"
+  },
+  "level": {
+    "beginner": "初學者",
+    "intermediate": "中級",
+    "expert": "高級"
+  },
+  "mechanic": {
+    "compound": "複合",
+    "isolation": "孤立"
+  },
+  "force": {
+    "push": "推",
+    "pull": "拉",
+    "static": "靜態"
+  },
+  "category": {
+    "strength": "重訓",
+    "cardio": "有氧運動",
+    "powerlifting": "健力舉重",
+    "olympic weightlifting": "奧林匹克舉重",
+    "strongman": "大力士訓練",
+    "plyometrics": "爆發力訓練",
+    "stretching": "伸展拉筋",
+    "back": "返回",
+    "chest": "胸肌",
+    "shoulders": "肩部",
+    "neck": "頸部",
+    "waist": "腰圍"
+  },
+  "body_part": {
+    "abdominals": "腹肌",
+    "abductors": "外展肌",
+    "calves": "小腿",
+    "chest": "胸肌",
+    "forearms": "前臂",
+    "glutes": "臀部",
+    "hamstrings": "腿後肌群",
+    "lower back": "下背",
+    "middle back": "中背",
+    "neck": "頸部",
+    "shoulders": "肩部",
+    "back": "返回",
+    "cardio": "有氧運動",
+    "general": "一般運動",
+    "hips": "臀圍",
+    "waist": "腰圍",
+    "quads": "股四頭肌",
+    "upper back": "上背"
+  },
+  "modality": {
+    "weight_reps": "重量與次數",
+    "reps_only": "僅次數",
+    "bodyweight_reps": "自身體重（+/− 體重）",
+    "weight_duration": "重量與時間（負重支撐）",
+    "weight_distance": "重量與距離（負重行走）",
+    "duration": "時長",
+    "duration_distance": "時長與距離"
+  }
+}

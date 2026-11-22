@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "Abdominaux",
+    "abductors": "Abducteurs",
+    "adductors": "Adducteurs",
+    "biceps": "Biceps",
+    "calves": "Mollets",
+    "chest": "Pectoraux",
+    "forearms": "Avant-bras",
+    "glutes": "Fessiers",
+    "hamstrings": "Ischio-jambiers",
+    "lats": "Dorsaux",
+    "lower back": "Lombaires",
+    "middle back": "Milieu du dos",
+    "neck": "Cou",
+    "quadriceps": "Quadriceps",
+    "shoulders": "Épaules",
+    "traps": "Trapèzes",
+    "triceps": "Triceps"
+  },
+  "equipment": {
+    "barbell": "Barre",
+    "dumbbell": "Haltère",
+    "kettlebells": "Kettlebells",
+    "cable": "Poulie",
+    "machine": "Machine",
+    "bands": "Élastiques",
+    "body only": "Poids du corps",
+    "medicine ball": "Médecine-ball",
+    "exercise ball": "Ballon de gym",
+    "foam roll": "Rouleau de massage",
+    "e-z curl bar": "Barre EZ",
+    "other": "Autre"
+  },
+  "level": {
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "expert": "Expert"
+  },
+  "mechanic": {
+    "compound": "Poly-articulaire",
+    "isolation": "Isolation"
+  },
+  "force": {
+    "push": "Poussée",
+    "pull": "Tirage",
+    "static": "Isométrique",
+    "isometric": "Isométrique",
+    "crush": "Écrasement"
+  },
+  "category": {
+    "strength": "Force",
+    "cardio": "Cardio",
+    "powerlifting": "Powerlifting",
+    "olympic weightlifting": "Haltérophilie",
+    "strongman": "Strongman",
+    "plyometrics": "Pliométrie",
+    "stretching": "Étirements",
+    "back": "Retour",
+    "chest": "Pectoraux",
+    "shoulders": "Épaules",
+    "neck": "Cou",
+    "waist": "Tour de taille",
+    "upper arms": "Haut des bras",
+    "lower arms": "Bas des bras",
+    "upper legs": "Haut des jambes",
+    "lower legs": "Bas des jambes",
+    "mobility": "Mobilité"
+  },
+  "body_part": {
+    "abdominals": "Abdominaux",
+    "abductors": "Abducteurs",
+    "calves": "Mollets",
+    "chest": "Pectoraux",
+    "forearms": "Avant-bras",
+    "glutes": "Fessiers",
+    "hamstrings": "Ischio-jambiers",
+    "lower back": "Lombaires",
+    "middle back": "Milieu du dos",
+    "neck": "Cou",
+    "shoulders": "Épaules",
+    "back": "Retour",
+    "cardio": "Cardio",
+    "general": "Général",
+    "hips": "Hanches",
+    "waist": "Tour de taille",
+    "quads": "Quadriceps",
+    "upper back": "Haut du dos",
+    "thighs": "Cuisses",
+    "upper arms": "Haut des bras",
+    "lower arms": "Bas des bras",
+    "upper legs": "Haut des jambes",
+    "lower legs": "Bas des jambes"
+  },
+  "modality": {
+    "weight_reps": "Poids & répétitions",
+    "reps_only": "Répétitions",
+    "bodyweight_reps": "Poids du corps (+/− charge)",
+    "weight_duration": "Charge et durée (maintiens chargés)",
+    "weight_distance": "Charge et distance (portés)",
+    "duration": "Durée",
+    "duration_distance": "Durée & distance"
+  },
+  "laterality": {
+    "bilateral": "Bilatéral",
+    "unilateral_left": "Unilatéral gauche",
+    "unilateral_right": "Unilatéral droit",
+    "alternating": "Alterné"
+  },
+  "movement_plane": {
+    "sagittal": "Sagittal",
+    "frontal": "Frontal",
+    "transverse": "Transversal",
+    "multiplanar": "Multiplanaire"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "muscle": {
+    "abdominals": "Buikspieren",
+    "abductors": "Abductoren",
+    "adductors": "Adductoren",
+    "calves": "Kuiten",
+    "chest": "Borst",
+    "forearms": "Onderarmen",
+    "glutes": "Bilspieren",
+    "lower back": "Onderrug",
+    "middle back": "Middenrug",
+    "neck": "Nek",
+    "shoulders": "Schouders",
+    "traps": "Trapezius"
+  },
+  "equipment": {
+    "barbell": "Halterstang",
+    "cable": "Kabel",
+    "bands": "Weerstandsbanden",
+    "body only": "Alleen Lichaamsgewicht",
+    "medicine ball": "Medicijnbal",
+    "exercise ball": "Gymbal",
+    "foam roll": "Foamroller",
+    "e-z curl bar": "E-Z Curlstang",
+    "other": "Overig"
+  },
+  "level": {
+    "intermediate": "Gemiddeld"
+  },
+  "mechanic": {
+    "compound": "Samengesteld",
+    "isolation": "Isolatie"
+  },
+  "force": {
+    "push": "Duwen",
+    "pull": "Trekken",
+    "static": "Statisch"
+  },
+  "category": {
+    "strength": "Kracht",
+    "powerlifting": "Powerliften",
+    "olympic weightlifting": "Olympisch gewichtheffen",
+    "plyometrics": "Plyometrie",
+    "stretching": "Rekken",
+    "back": "Terug",
+    "chest": "Borst",
+    "shoulders": "Schouders",
+    "neck": "Nek",
+    "waist": "Taille"
+  },
+  "body_part": {
+    "abdominals": "Buikspieren",
+    "abductors": "Abductoren",
+    "calves": "Kuiten",
+    "chest": "Borst",
+    "forearms": "Onderarmen",
+    "glutes": "Bilspieren",
+    "lower back": "Onderrug",
+    "middle back": "Middenrug",
+    "neck": "Nek",
+    "shoulders": "Schouders",
+    "back": "Terug",
+    "general": "Algemeen",
+    "hips": "Heupen",
+    "waist": "Taille"
+  },
+  "modality": {
+    "weight_reps": "Gewicht & herhalingen",
+    "reps_only": "Herhalingen",
+    "bodyweight_reps": "Lichaamsgewicht (+/− gewicht)",
+    "weight_duration": "Gewicht & Duur (belaste houdingen)",
+    "weight_distance": "Gewicht & Afstand (dragen)",
+    "duration": "Duur",
+    "duration_distance": "Duur & afstand"
+  }
+}

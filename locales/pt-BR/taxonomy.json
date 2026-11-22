@@ -1,0 +1,89 @@
+{
+  "muscle": {
+    "abdominals": "Abdômen",
+    "abductors": "Abdutores",
+    "adductors": "Adutores",
+    "biceps": "Bíceps",
+    "calves": "Panturrilhas",
+    "chest": "Peito",
+    "forearms": "Antebraços",
+    "glutes": "Glúteos",
+    "hamstrings": "Posteriores da coxa",
+    "lats": "Dorsais",
+    "lower back": "Lombar",
+    "middle back": "Meio das costas",
+    "neck": "Pescoço",
+    "quadriceps": "Quadríceps",
+    "shoulders": "Ombros",
+    "traps": "Trapézio",
+    "triceps": "Tríceps"
+  },
+  "equipment": {
+    "barbell": "Barra",
+    "dumbbell": "Halter",
+    "kettlebells": "Kettlebell",
+    "cable": "Cabo / polia",
+    "machine": "Máquina",
+    "bands": "Elásticos",
+    "body only": "Peso corporal",
+    "exercise ball": "Bola suíça",
+    "foam roll": "Rolo de liberação",
+    "e-z curl bar": "Barra W",
+    "other": "Outro"
+  },
+  "level": {
+    "beginner": "Iniciante",
+    "intermediate": "Intermediário",
+    "expert": "Avançado"
+  },
+  "mechanic": {
+    "compound": "Composto",
+    "isolation": "Isolado"
+  },
+  "force": {
+    "push": "Empurrar",
+    "pull": "Puxar",
+    "static": "Estático"
+  },
+  "category": {
+    "strength": "Força",
+    "powerlifting": "Levantamento de Peso",
+    "olympic weightlifting": "Halterofilismo",
+    "strongman": "Atletismo de Força",
+    "plyometrics": "Pliometria",
+    "stretching": "Alongamento",
+    "back": "Voltar",
+    "chest": "Peito",
+    "shoulders": "Ombros",
+    "neck": "Pescoço",
+    "waist": "Cintura"
+  },
+  "body_part": {
+    "abdominals": "Abdômen",
+    "abductors": "Abdutores",
+    "calves": "Panturrilhas",
+    "chest": "Peito",
+    "forearms": "Antebraços",
+    "glutes": "Glúteos",
+    "hamstrings": "Posteriores da coxa",
+    "lower back": "Lombar",
+    "middle back": "Meio das costas",
+    "neck": "Pescoço",
+    "shoulders": "Ombros",
+    "back": "Voltar",
+    "general": "Geral",
+    "hips": "Quadril",
+    "waist": "Cintura",
+    "quads": "Quadríceps",
+    "upper back": "Parte superior das costas"
+  },
+  "modality": {
+    "weight_reps": "Peso e repetições",
+    "reps_only": "Repetições",
+    "bodyweight_reps": "Peso corporal (+/− carga)",
+    "weight_duration": "Peso e duração (isometria com carga)",
+    "weight_distance": "Peso e Distância (transportes)",
+    "duration": "Duração",
+    "duration_distance": "Duração e distância"
+  }
+}

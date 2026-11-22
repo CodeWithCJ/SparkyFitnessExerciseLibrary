@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "पेट की मांसपेशियां",
+    "abductors": "एब्डक्टर्स",
+    "adductors": "एडक्टर्स",
+    "biceps": "बाइसेप्स",
+    "calves": "पिंडली",
+    "chest": "छाती",
+    "forearms": "अग्रबाहु",
+    "glutes": "ग्लूट्स",
+    "hamstrings": "हैमस्ट्रिंग",
+    "lats": "लैट्स",
+    "lower back": "निचली पीठ",
+    "middle back": "मध्य पीठ",
+    "neck": "गर्दन",
+    "quadriceps": "क्वाड्रिसेप्स",
+    "shoulders": "कंधे",
+    "traps": "ट्रैप्स",
+    "triceps": "ट्राइसेप्स"
+  },
+  "equipment": {
+    "barbell": "बारबेल",
+    "dumbbell": "डम्बल",
+    "kettlebells": "केटलबेल",
+    "cable": "केबल",
+    "machine": "मशीन",
+    "bands": "बैंड",
+    "body only": "केवल शरीर",
+    "medicine ball": "मेडिसिन बॉल",
+    "exercise ball": "एक्सरसाइज बॉल",
+    "foam roll": "फोम रोलर",
+    "e-z curl bar": "ई-जेड कर्ल बार",
+    "other": "अन्य"
+  },
+  "level": {
+    "beginner": "शुरुआती",
+    "intermediate": "मध्यम",
+    "expert": "विशेषज्ञ"
+  },
+  "mechanic": {
+    "compound": "कंपाउंड",
+    "isolation": "आइसोलेशन"
+  },
+  "force": {
+    "push": "पुश (धक्का)",
+    "pull": "पुल (खींचना)",
+    "static": "स्टैटिक (स्थिर)",
+    "isometric": "आइसोमेट्रिक",
+    "crush": "क्रश"
+  },
+  "category": {
+    "strength": "ताकत",
+    "cardio": "कार्डियो",
+    "powerlifting": "पावरलिफ्टिंग",
+    "olympic weightlifting": "ओलंपिक वेटलिफ्टिंग",
+    "strongman": "स्ट्रॉन्गमैन",
+    "plyometrics": "प्लायोमेट्रिक्स",
+    "stretching": "स्ट्रेचिंग",
+    "back": "पीठ",
+    "chest": "छाती",
+    "shoulders": "कंधे",
+    "neck": "गर्दन",
+    "waist": "कमर",
+    "upper arms": "ऊपरी बाजू",
+    "lower arms": "निचली बाजू",
+    "upper legs": "ऊपरी पैर",
+    "lower legs": "निचले पैर",
+    "mobility": "गतिशीलता"
+  },
+  "body_part": {
+    "abdominals": "पेट की मांसपेशियां",
+    "abductors": "एब्डक्टर्स",
+    "calves": "पिंडली",
+    "chest": "छाती",
+    "forearms": "अग्रबाहु",
+    "glutes": "ग्लूट्स",
+    "hamstrings": "हैमस्ट्रिंग",
+    "lower back": "निचली पीठ",
+    "middle back": "मध्य पीठ",
+    "neck": "गर्दन",
+    "shoulders": "कंधे",
+    "back": "पीठ",
+    "cardio": "कार्डियो",
+    "general": "सामान्य",
+    "hips": "कूल्हे",
+    "waist": "कमर",
+    "quads": "क्वाड्स",
+    "upper back": "ऊपरी पीठ",
+    "thighs": "जांघें",
+    "upper arms": "ऊपरी बाजू",
+    "lower arms": "निचली बाजू",
+    "upper legs": "ऊपरी पैर",
+    "lower legs": "निचले पैर"
+  },
+  "modality": {
+    "weight_reps": "वजन और दोहराव",
+    "reps_only": "केवल दोहराव",
+    "bodyweight_reps": "शारीरिक वजन के साथ दोहराव",
+    "weight_duration": "वजन और अवधि",
+    "weight_distance": "वजन और दूरी",
+    "duration": "अवधि",
+    "duration_distance": "अवधि और दूरी"
+  },
+  "laterality": {
+    "bilateral": "द्विपक्षीय",
+    "unilateral_left": "एकतरफा (बायां)",
+    "unilateral_right": "एकतरफा (दायां)",
+    "alternating": "बारी-बारी"
+  },
+  "movement_plane": {
+    "sagittal": "धनु तल",
+    "frontal": "ललाट तल",
+    "transverse": "अनुप्रस्थ तल",
+    "multiplanar": "बहुतलीय"
+  }
+}

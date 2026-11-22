@@ -1,0 +1,86 @@
+{
+  "muscle": {
+    "abdominals": "Břišní svaly",
+    "abductors": "Abduktory",
+    "adductors": "Adduktory",
+    "calves": "Lýtka",
+    "chest": "Hrudník",
+    "forearms": "Předloktí",
+    "glutes": "Hýžďové svaly",
+    "hamstrings": "Zadní stehenní svaly",
+    "lats": "Široké svaly zádové",
+    "lower back": "Dolní část zad",
+    "middle back": "Střední část zad",
+    "neck": "Krk",
+    "quadriceps": "Čtyřhlavé svaly stehenní",
+    "shoulders": "Ramena",
+    "traps": "Trapézy"
+  },
+  "equipment": {
+    "barbell": "Velká činka",
+    "dumbbell": "Jednoruční činka",
+    "kettlebells": "Kettlebelly",
+    "cable": "Kladka",
+    "machine": "Stroj",
+    "bands": "Gumy",
+    "body only": "Pouze vlastní váha",
+    "medicine ball": "Medicinbal",
+    "exercise ball": "Gymnastický míč",
+    "foam roll": "Válec",
+    "e-z curl bar": "Zalomená tyč EZ",
+    "other": "Ostatní"
+  },
+  "level": {
+    "beginner": "Začátečník",
+    "intermediate": "Středně pokročilý",
+    "expert": "Pokročilý"
+  },
+  "mechanic": {
+    "compound": "Vícekloubový",
+    "isolation": "Izolace"
+  },
+  "force": {
+    "push": "Tlak",
+    "pull": "Přítah",
+    "static": "Statický"
+  },
+  "category": {
+    "strength": "Pevnost",
+    "cardio": "Kardio",
+    "powerlifting": "Silový trojboj",
+    "olympic weightlifting": "Olympijské vzpírání",
+    "strongman": "Silák",
+    "plyometrics": "Plyometrie",
+    "stretching": "Protahování",
+    "back": "Zpět",
+    "chest": "Hrudník",
+    "shoulders": "Ramena",
+    "neck": "Krk",
+    "waist": "Pas"
+  },
+  "body_part": {
+    "abdominals": "Břišní svaly",
+    "abductors": "Abduktory",
+    "calves": "Lýtka",
+    "chest": "Hrudník",
+    "forearms": "Předloktí",
+    "glutes": "Hýžďové svaly",
+    "hamstrings": "Zadní stehenní svaly",
+    "lower back": "Dolní část zad",
+    "middle back": "Střední část zad",
+    "neck": "Krk",
+    "shoulders": "Ramena",
+    "back": "Zpět",
+    "cardio": "Kardio",
+    "general": "Generál",
+    "hips": "Boky",
+    "waist": "Pas",
+    "quads": "Čtyřhlavé svaly stehenní"
+  },
+  "modality": {
+    "weight_reps": "Hmotnost a opakování",
+    "reps_only": "Pouze opakování",
+    "duration": "Trvání",
+    "duration_distance": "Délka a vzdálenost"
+  }
+}
