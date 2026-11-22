@@ -3,6 +3,14 @@ name: Deploy site
 on:
   push:
     branches: [main]
+    # Only rebuild the site when something it shows changes.
+    paths:
+      - 'docs/**'
+      - 'dist/**'
+      - 'locales/**'
+      - 'exercises/**'
+      - 'scripts/prepare-site.mjs'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:

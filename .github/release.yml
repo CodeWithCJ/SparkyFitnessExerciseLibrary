@@ -1,0 +1,34 @@
+# GitHub's auto-generated release notes. Only `changelog.exclude` and `changelog.categories`
+# are part of the schema; anything else is silently ignored.
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - invalid
+      - wontfix
+      - question
+      - dependencies
+      - "good first issue"
+      - "help wanted"
+  categories:
+    - title: "Security"
+      labels:
+        - security
+    - title: "Exercise data"
+      labels:
+        - exercise-data
+    - title: "Media"
+      labels:
+        - media
+    - title: "Features"
+      labels:
+        - enhancement
+    - title: "Fixes"
+      labels:
+        - bug
+    - title: "Browse site"
+      labels:
+        - site
+    - title: "Other Changes"
+      labels:
+        - "*"

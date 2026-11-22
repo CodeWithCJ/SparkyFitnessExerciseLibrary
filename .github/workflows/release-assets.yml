@@ -1,0 +1,60 @@
+name: Attach assets to release
+
+# Apps pin a release of the catalog. When a maintainer publishes a GitHub Release (the v* tag
+# ruleset stops automation from creating tags), this validates the tagged commit and attaches
+# the files an app needs, plus the license and third-party notices that must travel with them.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag of the release to attach assets to (e.g. v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-assets-${{ github.event.release.tag_name || inputs.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  attach:
+    name: Validate, build and attach the catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # upload release assets
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install ffmpeg (video checks)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Validate exercises
+        run: node scripts/validate.mjs
+      - name: Check the committed catalog is current
+        run: |
+          node scripts/build.mjs
+          git diff --exit-code -- dist locales
+      - name: Package assets
+        run: |
+          mkdir release-assets
+          cp dist/exercises.json release-assets/exercises.json
+          (cd locales && zip -qr ../release-assets/locales.zip .)
+          cp LICENSE NOTICE.md release-assets/
+          (cd release-assets && sha256sum exercises.json locales.zip LICENSE NOTICE.md > SHA256SUMS.txt)
+          ls -la release-assets
+      - name: Upload assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$TAG" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
