@@ -59199,7 +59199,17 @@
       "animation_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
       "animation_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.webp",
       "thumbnail_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_thumb.webp",
-      "image_path": null
+      "image_path": null,
+      "male": {
+        "video_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4",
+        "video_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4",
+        "video_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.mp4",
+        "animation_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
+        "animation_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
+        "animation_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.webp",
+        "thumbnail_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_thumb.webp",
+        "image_path": null
+      }
     },
     "instructions": "Kneel on the floor and place the wheel roller in front of you. Place your hands on the handles of the wheel roller and extend your arms straight out in front of you. Engage your core muscles and slowly roll the wheel forward, keeping your back straight and your abs tight. Continue rolling forward until your body is fully extended and your arms are overhead. Pause for a moment, then slowly roll the wheel back towards your knees, maintaining control and keeping your abs engaged. Repeat for the desired number of repetitions.",
     "folder": "sf-core-oth-0002_ab_wheel_rollout"
@@ -66376,7 +66386,17 @@
       "animation_vertical_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.webp",
       "animation_horizontal_path": null,
       "thumbnail_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_thumb.webp",
-      "image_path": null
+      "image_path": null,
+      "male": {
+        "video_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.mp4",
+        "video_vertical_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.mp4",
+        "video_horizontal_path": null,
+        "animation_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.webp",
+        "animation_vertical_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.webp",
+        "animation_horizontal_path": null,
+        "thumbnail_path": "exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_thumb.webp",
+        "image_path": null
+      }
     },
     "instructions": "Stand with your feet shoulder-width apart, with the band placed just above your knees. Keeping your chest up and core engaged, push your hips back and bend your knees to lower into a squat position. Make sure your knees are tracking over your toes and your weight is in your heels. Pause for a moment at the bottom, then push through your heels to return to the starting position. Repeat for the desired number of repetitions.",
     "folder": "sf-legs-bnd-0010_squat_band"

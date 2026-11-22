@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mediaPaths } from './lib/media-discovery.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pub = path.join(root, 'docs/src/public');
@@ -31,9 +32,7 @@ for (const l of langs) copy(`locales/${l}/exercises.json`);
 const catalog = JSON.parse(fs.readFileSync(path.join(root, 'dist/exercises.json'), 'utf8'));
 const files = new Set();
 for (const e of catalog) {
-  for (const value of Object.values(e.media ?? {})) {
-    if (typeof value === 'string' && value.startsWith('exercises/')) files.add(value);
-  }
+  for (const file of mediaPaths(e.media)) files.add(file);
 }
 for (const f of files) copy(f);
 
