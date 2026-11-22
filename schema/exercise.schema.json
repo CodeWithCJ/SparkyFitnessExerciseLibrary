@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SparkyFitnessExercise",
+  "description": "Canonical schema for an individual SparkyFitness exercise definition",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "taxonomy",
+    "biomechanics",
+    "steps"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "description": "Catalog ID: sf-<body>-<equip>-<number> (e.g., 'sf-core-oth-0002'). Assigned once and never changed, even if the exercise is reclassified. Rules are in taxonomy/catalog-codes.json. The folder is named '<id>_<slug>'.",
+      "pattern": "^sf-(chest|back|shld|arms|legs|core|card)-(bb|db|kb|bw|cbl|mch|bnd|bal|ez|oth)-[0-9]{4}$"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Lowercase name used in the folder and media file names (e.g., 'ab_wheel_rollout'). At most 50 characters.",
+      "pattern": "^[a-z0-9_]+$",
+      "maxLength": 50
+    },
+    "name": {
+      "type": "string",
+      "description": "Canonical English display name of the exercise",
+      "minLength": 2
+    },
+    "description": {
+      "type": ["string", "null"],
+      "description": "Optional one-line summary or overview of the exercise"
+    },
+    "calories_per_hour": {
+      "type": ["number", "null"],
+      "description": "Estimated calorie burn per hour (primarily for cardio or endurance exercises)"
+    },
+    "aliases": {
+      "type": "array",
+      "description": "Alternative names or search synonyms",
+      "items": {
+        "type": "string"
+      }
+    },
+    "taxonomy": {
+      "type": "object",
+      "required": [
+        "modality",
+        "category",
+        "body_part",
+        "equipment",
+        "primary_muscles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "modality": {
+          "type": "string",
+          "enum": [
+            "weight_reps",
+            "reps_only",
+            "bodyweight_reps",
+            "weight_duration",
+            "weight_distance",
+            "duration",
+            "duration_distance"
+          ],
+          "description": "Modal input type matching SparkyFitness EXERCISE_MODALITIES"
+        },
+        "category": {
+          "type": "string",
+          "description": "Target body area or exercise category (e.g. chest, back, waist, arms, legs, cardio)"
+        },
+        "body_part": {
+          "type": "string",
+          "description": "Anatomical region (e.g. chest, upper arms, waist, thighs)"
+        },
+        "mechanic": {
+          "type": ["string", "null"],
+          "enum": ["compound", "isolation", null],
+          "description": "Multi-joint compound or single-joint isolation"
+        },
+        "force": {
+          "type": ["string", "null"],
+          "enum": ["push", "pull", "static", null],
+          "description": "Direction of force applied"
+        },
+        "level": {
+          "type": ["string", "null"],
+          "enum": ["beginner", "intermediate", "expert", null],
+          "description": "Experience level required"
+        },
+        "equipment": {
+          "type": "string",
+          "enum": [
+            "barbell",
+            "dumbbell",
+            "kettlebells",
+            "cable",
+            "machine",
+            "bands",
+            "body only",
+            "medicine ball",
+            "exercise ball",
+            "foam roll",
+            "e-z curl bar",
+            "other"
+          ],
+          "description": "Required equipment matching SparkyFitness CANONICAL_EQUIPMENT"
+        },
+        "primary_muscles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "abdominals",
+              "abductors",
+              "adductors",
+              "biceps",
+              "calves",
+              "chest",
+              "forearms",
+              "glutes",
+              "hamstrings",
+              "lats",
+              "lower back",
+              "middle back",
+              "neck",
+              "quadriceps",
+              "shoulders",
+              "traps",
+              "triceps"
+            ]
+          },
+          "description": "Primary muscles targeted, matching SparkyFitness CANONICAL_MUSCLES"
+        },
+        "secondary_muscles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "abdominals",
+              "abductors",
+              "adductors",
+              "biceps",
+              "calves",
+              "chest",
+              "forearms",
+              "glutes",
+              "hamstrings",
+              "lats",
+              "lower back",
+              "middle back",
+              "neck",
+              "quadriceps",
+              "shoulders",
+              "traps",
+              "triceps"
+            ]
+          },
+          "description": "Synergist or assisting muscles"
+        }
+      }
+    },
+    "biomechanics": {
+      "type": "object",
+      "required": ["laterality"],
+      "additionalProperties": false,
+      "properties": {
+        "laterality": {
+          "type": "string",
+          "enum": [
+            "bilateral",
+            "unilateral_left",
+            "unilateral_right",
+            "alternating"
+          ]
+        },
+        "movement_plane": {
+          "type": "string",
+          "enum": ["sagittal", "frontal", "transverse", "multiplanar"]
+        },
+        "default_tempo": {
+          "type": "string",
+          "description": "Default tempo notation (eccentric-pause-concentric-pause, e.g. '2-0-2-0')"
+        },
+        "demonstration_reps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of complete movement cycles shown in the demonstration video"
+        }
+      }
+    },
+    "media": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "video_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to default MP4 video demonstration within the exercise directory"
+        },
+        "video_vertical_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to vertical 9:16 MP4 video demonstration within the exercise directory"
+        },
+        "video_horizontal_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to horizontal 16:9 MP4 video demonstration within the exercise directory"
+        },
+        "animation_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to looping preview animation within the exercise directory"
+        },
+        "animation_vertical_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to vertical 9:16 looping preview animation within the exercise directory"
+        },
+        "animation_horizontal_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to horizontal 16:9 looping preview animation within the exercise directory"
+        },
+        "gif_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Legacy fallback filename to looping preview animated GIF within the exercise directory"
+        },
+        "thumbnail_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Relative filename to card thumbnail image within the exercise directory"
+        },
+        "thumbnail_timestamp": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional timestamp in seconds to extract the defining action thumbnail frame"
+        },
+        "image_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Optional fallback static diagram filename within the exercise directory"
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "description": "Ordered sequence of action steps in English. Used as canonical source of truth for translations in Weblate.",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 5
+      }
+    },
+    "coaching_cues": {
+      "type": "array",
+      "description": "Short bullet points highlighting common form errors, breathing cues, or posture tips",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rehabilitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "joint": {
+          "type": "string",
+          "enum": [
+            "neck",
+            "shoulder",
+            "elbow_wrist",
+            "thoracic_spine",
+            "lumbar_spine",
+            "hip",
+            "knee",
+            "ankle_foot"
+          ],
+          "description": "Primary anatomical joint or region targeted for rehabilitation"
+        },
+        "target_conditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Targeted clinical or orthopedic conditions (e.g., runner_knee, rotator_cuff_impingement, sciatica)"
+        },
+        "contraindications": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Conditions or symptoms when this exercise should NOT be performed"
+        },
+        "clinical_protocol": {
+          "type": "string",
+          "description": "Clinical reference or guideline (e.g., AAOS Knee Protocol, McGill Spine, APTA)"
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "attribution": { "type": "string" }
+      }
+    }
+  }
+}

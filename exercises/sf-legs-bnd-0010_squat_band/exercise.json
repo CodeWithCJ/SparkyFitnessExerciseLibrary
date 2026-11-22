@@ -1,0 +1,57 @@
+{
+  "$schema": "../../schema/exercise.schema.json",
+  "id": "sf-legs-bnd-0010",
+  "slug": "squat_band",
+  "name": "Squat (Band)",
+  "aliases": [
+    "Band Squat",
+    "Resistance Band Squat",
+    "Reverse Band Box Squat"
+  ],
+  "taxonomy": {
+    "modality": "reps_only",
+    "category": "upper legs",
+    "body_part": "upper legs",
+    "mechanic": "compound",
+    "force": "push",
+    "level": "intermediate",
+    "equipment": "bands",
+    "primary_muscles": [
+      "glutes",
+      "quadriceps"
+    ],
+    "secondary_muscles": [
+      "hamstrings",
+      "calves",
+      "abductors",
+      "adductors",
+      "forearms",
+      "lower back"
+    ]
+  },
+  "biomechanics": {
+    "laterality": "bilateral",
+    "movement_plane": "sagittal",
+    "default_tempo": "2-0-2-0",
+    "demonstration_reps": 2
+  },
+  "steps": [
+    "Stand with your feet shoulder-width apart, with the band placed just above your knees.",
+    "Keeping your chest up and core engaged, push your hips back and bend your knees to lower into a squat position.",
+    "Make sure your knees are tracking over your toes and your weight is in your heels.",
+    "Pause for a moment at the bottom, then push through your heels to return to the starting position.",
+    "Repeat for the desired number of repetitions."
+  ],
+  "coaching_cues": [
+    "Keep chest upright and do not allow the band tension to pull your shoulders forward",
+    "Drive knees outward in line with toes to prevent knee collapse",
+    "Maintain full foot contact with the floor throughout the movement"
+  ],
+  "sources": {
+    "hasan_id": "1004",
+    "free_id": "Reverse_Band_Box_Squat"
+  },
+  "media": {
+    "thumbnail_timestamp": 3
+  }
+}

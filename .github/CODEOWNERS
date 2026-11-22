@@ -1,0 +1,10 @@
+# Protects governance, licensing, tooling and the contract apps rely on.
+/LICENSE                @CodeWithCJ
+/NOTICE.md              @CodeWithCJ
+/SECURITY.md            @CodeWithCJ
+/.github/               @CodeWithCJ
+/scripts/               @CodeWithCJ
+/schema/                @CodeWithCJ
+/taxonomy/              @CodeWithCJ
+/package.json           @CodeWithCJ
+/.weblate.json          @CodeWithCJ

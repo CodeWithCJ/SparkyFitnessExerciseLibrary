@@ -1,0 +1,29 @@
+name: Exercise data issue or request
+description: Report wrong exercise data, a bad translation, or request a missing exercise.
+labels: ['exercise-data']
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of issue is this?
+      options:
+        - Wrong or missing data (muscles, equipment, instructions…)
+        - Translation problem
+        - Media problem
+        - Request a new exercise
+    validations:
+      required: true
+  - type: input
+    id: exercise
+    attributes:
+      label: Exercise
+      description: Folder name or ID, e.g. 00025_barbell_bench_press. For a new exercise, its common name.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What is wrong and what it should be. Include a source if you have one.
+    validations:
+      required: true

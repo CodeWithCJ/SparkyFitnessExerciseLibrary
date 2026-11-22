@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install ffmpeg (video checks)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Validate exercises
+        run: node scripts/validate.mjs
+      - name: Build catalog
+        run: node scripts/build.mjs
+      - name: Check dist/exercises.json is up to date
+        run: |
+          if ! git diff --quiet -- dist/ locales/; then
+            echo "::error::Run 'pnpm build' and commit the result."
+            git diff --stat -- dist/ locales/
+            exit 1
+          fi

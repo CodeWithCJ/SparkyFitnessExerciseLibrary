@@ -1,0 +1,43 @@
+{
+  "_comment": "Rules for catalog IDs: sf-<body>-<equip>-<number>. The body code comes from the first primary muscle (or 'card' for the cardio category), the equipment code from taxonomy.equipment. An ID is assigned once and never changes, even if the exercise is later reclassified.",
+  "body": {
+    "chest": "Chest",
+    "back": "Back: lats, middle and lower back, traps",
+    "shld": "Shoulders and neck",
+    "arms": "Arms: biceps, triceps, forearms",
+    "legs": "Legs: quadriceps, hamstrings, glutes, calves, abductors, adductors",
+    "core": "Core and waist: abdominals",
+    "card": "Cardio and conditioning (taxonomy.category 'cardio')"
+  },
+  "muscle_to_body": {
+    "chest": "chest",
+    "lats": "back",
+    "middle back": "back",
+    "lower back": "back",
+    "traps": "back",
+    "shoulders": "shld",
+    "neck": "shld",
+    "biceps": "arms",
+    "triceps": "arms",
+    "forearms": "arms",
+    "quadriceps": "legs",
+    "hamstrings": "legs",
+    "glutes": "legs",
+    "calves": "legs",
+    "abductors": "legs",
+    "adductors": "legs",
+    "abdominals": "core"
+  },
+  "equipment": {
+    "bb": ["barbell"],
+    "db": ["dumbbell"],
+    "kb": ["kettlebells"],
+    "bw": ["body only"],
+    "cbl": ["cable"],
+    "mch": ["machine"],
+    "bnd": ["bands"],
+    "bal": ["medicine ball", "exercise ball"],
+    "ez": ["e-z curl bar"],
+    "oth": ["other", "foam roll"]
+  }
+}
