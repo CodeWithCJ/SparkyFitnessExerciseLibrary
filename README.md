@@ -333,6 +333,10 @@ Each [release](https://github.com/CodeWithCJ/SparkyFitnessExerciseLibrary/releas
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). AI tools and developers: read [`AGENTS.md`](AGENTS.md) first.
 
+## Removal Requests
+
+If you hold rights to an image, video or text in this library, or you appear in one of the videos, and you want it removed, [open an issue](https://github.com/CodeWithCJ/SparkyFitnessExerciseLibrary/issues/new) titled "Removal request" with the exercise ID and file name, or message the maintainer ([@CodeWithCJ](https://github.com/CodeWithCJ)) on GitHub. We will take the media out of the repository and the next release. Media from other sources lists its source in `sources.media` in the exercise's `exercise.json`, so it can be found and removed quickly.
+
 ## License & Credits
 
 Free for personal, educational and other non-commercial use; commercial use needs written permission. This covers the exercise data, translations, images and videos as well as the code. The SparkyFitness name, logo and character are not licensed for branding your own work. See [`LICENSE`](LICENSE).
