@@ -10,8 +10,8 @@
     "optimize-media": "node scripts/optimize-media.mjs",
     "list": "node scripts/list.mjs",
     "exercises": "node scripts/list.mjs",
-    "docs:dev": "pnpm --dir docs run dev",
-    "docs:build": "pnpm --dir docs run build"
+    "docs:dev": "node scripts/build.mjs && pnpm --dir docs run dev",
+    "docs:build": "node scripts/build.mjs && pnpm --dir docs run build"
   },
   "devDependencies": {
     "sharp": "^0.35.5"

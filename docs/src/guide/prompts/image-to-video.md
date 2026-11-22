@@ -2,4 +2,4 @@
 title: Image-to-video prompt
 ---
 
-<!--@include: ../../../../ImageToVideoExerciseGenerationPrompt.md-->
+<!--@include: ../../../../prompts/image-to-video.md-->

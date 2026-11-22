@@ -55,7 +55,7 @@ jobs:
                   '<!-- first-pr-welcome -->',
                   `👋 Welcome @${author} and thank you for opening your first pull request in the SparkyFitness Exercise Library! 🎉`,
                   '',
-                  'We will review it soon. Please make sure the mandatory checkboxes in your description are ticked so the checks can pass, and that `pnpm validate` and `pnpm build` ran cleanly with the rebuilt `dist/exercises.json` committed.',
+                  'We will review it soon. Please make sure the mandatory checkboxes in your description are ticked so the checks can pass, and that `pnpm validate` ran cleanly. You do not need to commit `dist/` or `locales/`; they are rebuilt after the merge.',
                 ]
               : [
                   '<!-- first-issue-welcome -->',

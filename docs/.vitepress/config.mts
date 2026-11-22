@@ -10,6 +10,11 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
 
+  vite: {
+    // The generator imports the repository's own rule modules and taxonomy from outside docs/.
+    server: { fs: { allow: ['..'] } },
+  },
+
   head: [
     ['link', { rel: 'icon', href: '/SparkyFitnessExerciseLibrary/favicon.ico' }],
     ['meta', { name: 'theme-color', content: '#3b82f6' }],
@@ -23,6 +28,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Browse', link: '/browse' },
+      { text: 'Contribute', link: '/contribute' },
       { text: 'Guide', link: '/guide/' },
       { text: 'SparkyFitness', link: 'https://codewithcj.github.io/SparkyFitness/' },
     ],

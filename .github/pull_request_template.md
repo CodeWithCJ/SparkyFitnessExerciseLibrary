@@ -1,7 +1,7 @@
 > [!TIP]
-> Run `pnpm validate` and `pnpm build` before you submit, and commit the rebuilt `dist/exercises.json`. CI checks both, so there are no boxes for them.
+> Run `pnpm validate` before you submit. You do not need to commit `dist/` or `locales/`; a workflow rebuilds them after the merge. New exercise? The [exercise generator](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/contribute) builds `exercise.json`, the ID and the file names for you.
 >
-> - Translations: only edit `locales/en/`. Other languages are synced through Weblate.
+> - Translations: the English text is in `exercise.json`. Don't edit `locales/`; other languages are synced through Weblate.
 > - New exercises: follow the ID and folder naming rules in the README.
 > - Media: only original work or media you have the right to license. Never add media from other exercise datasets or apps.
 >

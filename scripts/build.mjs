@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ID_PATTERN } from './lib/catalog.mjs';
+import { discoverMedia } from './lib/media-discovery.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,99 +40,6 @@ const stats = {
   equipment: {},
   muscles: {},
 };
-
-function discoverMedia(folder, exercisePath, overrides = {}) {
-  const files = fs.readdirSync(exercisePath);
-
-  // 1. Vertical Video (9:16)
-  let videoVertical = overrides?.video_vertical_path || null;
-  if (!videoVertical) {
-    const match = files.find(f => f.endsWith('.mp4') && (f.includes('_9_16') || f.includes('_vertical')));
-    if (match) videoVertical = match;
-  }
-
-  // 2. Horizontal Video (16:9)
-  let videoHorizontal = overrides?.video_horizontal_path || null;
-  if (!videoHorizontal) {
-    const match = files.find(f => f.endsWith('.mp4') && (f.includes('_16_9') || f.includes('_horizontal')));
-    if (match) videoHorizontal = match;
-  }
-
-  // 3. Default Video
-  let videoDefault = overrides?.video_path || null;
-  if (!videoDefault) {
-    const allMp4s = files.filter(f => f.endsWith('.mp4') && !f.startsWith('_temp_'));
-    if (allMp4s.length === 1) {
-      videoDefault = allMp4s[0];
-    } else if (videoVertical) {
-      videoDefault = videoVertical;
-    } else if (videoHorizontal) {
-      videoDefault = videoHorizontal;
-    }
-  }
-
-  // 4. Static Card Thumbnail (_thumb.webp, _thumb.jpg, or single static image)
-  let thumbnail = overrides?.thumbnail_path || null;
-  if (!thumbnail) {
-    const match = files.find(f => f.includes('_thumb.') && (f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png')));
-    if (match) {
-      thumbnail = match;
-    } else {
-      const generic = files.find(f => (f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png')) && !f.includes('_9_16') && !f.includes('_16_9') && !f.startsWith('_temp_'));
-      if (generic) thumbnail = generic;
-    }
-  }
-
-  // 5. Vertical Animation (_9_16.webp)
-  let animVertical = overrides?.animation_vertical_path || null;
-  if (!animVertical) {
-    const match = files.find(f => (f.includes('_9_16.webp') || f.includes('_9_16.gif')) && !f.startsWith('_temp_'));
-    if (match) {
-      animVertical = match;
-    } else if (videoVertical) {
-      // If a vertical video is present and there is a matching single animation
-      const single = files.find(f => f.endsWith('.webp') && !f.includes('_thumb.') && !f.includes('_16_9') && !f.startsWith('_temp_'));
-      if (single) animVertical = single;
-    }
-  }
-
-  // 6. Horizontal Animation (_16_9.webp)
-  let animHorizontal = overrides?.animation_horizontal_path || null;
-  if (!animHorizontal) {
-    const match = files.find(f => (f.includes('_16_9.webp') || f.includes('_16_9.gif')) && !f.startsWith('_temp_'));
-    if (match) animHorizontal = match;
-  }
-
-  // 7. Default Animation (WebP or GIF)
-  let animation = overrides?.animation_path || null;
-  if (!animation) {
-    if (animVertical) animation = animVertical;
-    else if (animHorizontal) animation = animHorizontal;
-    else {
-      const match = files.find(f => (f.endsWith('.gif') || (f.endsWith('.webp') && !f.includes('_thumb.'))) && !f.startsWith('_temp_'));
-      if (match) animation = match;
-    }
-  }
-
-  // 8. Static Image (for exercises without video)
-  let image = overrides?.image_path || null;
-  if (!image && !videoDefault) {
-    image = thumbnail;
-  }
-
-  const toRelative = (f) => f ? path.posix.join('exercises', folder, f) : null;
-
-  return {
-    video_path: toRelative(videoDefault),
-    video_vertical_path: toRelative(videoVertical),
-    video_horizontal_path: toRelative(videoHorizontal),
-    animation_path: toRelative(animation),
-    animation_vertical_path: toRelative(animVertical),
-    animation_horizontal_path: toRelative(animHorizontal),
-    thumbnail_path: toRelative(thumbnail),
-    image_path: toRelative(image),
-  };
-}
 
 for (const folder of exerciseFolders) {
   const jsonPath = path.join(exercisesDir, folder, 'exercise.json');

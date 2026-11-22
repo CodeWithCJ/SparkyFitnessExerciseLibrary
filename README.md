@@ -6,7 +6,7 @@ Contains **1,908 canonical exercises** with comprehensive biomechanical metadata
 
 ## Browse the Catalog
 
-Search and filter every exercise by muscle, equipment, level and more, play its video and read its steps in 9 languages: <https://codewithcj.github.io/SparkyFitnessExerciseLibrary/>. To run the site locally, run `pnpm install` in `docs/`, then `pnpm docs:dev` from the repository root.
+Search and filter every exercise by muscle, equipment, level and more, play its video and read its steps in 9 languages: <https://codewithcj.github.io/SparkyFitnessExerciseLibrary/>. Every exercise has a **Suggest an edit** button, and the [Contribute](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/contribute) page builds a new exercise for you. To run the site locally, run `pnpm install` in `docs/`, then `pnpm docs:dev` from the repository root.
 
 ## Sample Videos
 
@@ -33,7 +33,7 @@ Demonstrations generated with the SparkyFitness character and gym. Muscle highli
 - **`locales/<lang>/exercises.json`** — Translation dictionaries synced with Weblate (`en`, `es`, `fr`, `it`, `tr`, `zh`, `hi`, `pl`, `ko`).
 - **`taxonomy/`** — Standard muscle (`muscles.json`), equipment (`equipment.json`), and modality (`modalities.json`) lists, plus the catalog ID codes (`catalog-codes.json`).
 - **`schema/`** — JSON schema validation rules (`exercise.schema.json`).
-- **`dist/exercises.json`** — Consolidated catalog (1,908 exercises) compiled by the build script.
+- **`dist/exercises.json`** — Consolidated catalog (1,908 exercises) compiled by the build script and rebuilt automatically after every merge.
 
 ## CLI & Catalog Inspection
 
@@ -142,9 +142,21 @@ The `media` block is optional; here it only picks the thumbnail frame (`thumbnai
   "animation_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
   "animation_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.webp",
   "thumbnail_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_thumb.webp",
-  "image_path": null
+  "image_path": null,
+  "male": {
+    "video_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4",
+    "video_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4",
+    "video_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.mp4",
+    "animation_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
+    "animation_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
+    "animation_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.webp",
+    "thumbnail_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_thumb.webp",
+    "image_path": null
+  }
 }
 ```
+
+The flat keys are the default set (male, or female when that is all there is). `male` and `female` list each model's own files and are only present when that model has media.
 
 ## Media Standards & Auto-Discovery
 
@@ -203,7 +215,9 @@ pnpm media force-all
 
 ## Contributing an Exercise
 
-Follow these step-by-step instructions to add a new exercise:
+**Easiest way:** use the [exercise generator](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/contribute). It builds `exercise.json`, works out the ID, folder and media file names, checks them with the same rules as `pnpm validate`, and opens the file on GitHub so you can send it as a pull request without installing anything.
+
+Or follow these step-by-step instructions to add a new exercise by hand:
 
 ### 1. Choose the ID & Folder Name
 Every exercise gets a catalog ID of the form **`sf-<body>-<equip>-<number>`**, all lowercase, for example `sf-arms-db-0007`.
@@ -233,8 +247,8 @@ Every exercise gets a catalog ID of the form **`sf-<body>-<equip>-<number>`**, a
 * **Number**: the next free 4-digit number in that body/equipment pair. List what exists with `pnpm exercises sf-arms-db-` and take the next one.
 * **An ID never changes** once it is published, even if the exercise is later reclassified. Apps and translations rely on it. The codes in `taxonomy/catalog-codes.json` are the single source of the rules.
 * **Expected Naming Convention Format**:
-  * **Folder Name**: `exercises/<id>_<slug>/` (e.g., `exercises/sf-legs-bnd-0011_band_lateral_walk/`).
-  * **`id`**: The catalog ID only (`"sf-legs-bnd-0011"`).
+  * **Folder Name**: `exercises/<id>_<slug>/` (e.g., `exercises/sf-legs-bnd-0035_band_lateral_walk/`).
+  * **`id`**: The catalog ID only (`"sf-legs-bnd-0035"`).
   * **`slug`**: Lowercase snake_case, at most 50 characters (`"band_lateral_walk"`).
   * **`name`**: Clean Title Case display name (`"Band Lateral Walk"`).
 * **Word Order Standards**:
@@ -269,27 +283,24 @@ Every exercise gets a catalog ID of the form **`sf-<body>-<equip>-<number>`**, a
   * `<folder>_m_thumb.webp`: Lightweight static card thumbnail (360x640 / 640x360, ~15–25 KB).
   * `<folder>_m_9_16.webp` / `<folder>_m_16_9.webp`: Full-duration animated WebP preview loops (~160–460 KB) with 24-bit true color for smooth mobile & web playback and compact offline caching.
 
-### 4. Validate and Build
-Before committing, run:
+### 4. Validate
+Before opening the PR, run:
 ```bash
 pnpm validate   # Must pass with zero errors
-pnpm build      # Updates dist/exercises.json and locales/en/exercises.json
 ```
+You do **not** need to run `pnpm build` or commit `dist/` or `locales/`: after your PR is merged, a workflow rebuilds and commits them. Run `pnpm build` only to try the result locally (for example with `pnpm exercises` or `pnpm docs:dev`).
 
 ### 5. What to Commit & Submit in PR
-Git automatically ignores `.mp4` video files to prevent repository bloat. In your git commit, include:
+Videos live in the exercise folder and are committed like any other file. In your pull request, include:
 * ✅ `exercises/<folder>/exercise.json`
-* ✅ `exercises/<folder>/<folder>_m_thumb.webp` (static card thumbnail)
-* ✅ `exercises/<folder>/<folder>_m_9_16.webp` / `<folder>_m_16_9.webp` (animated WebP loops)
-* ✅ `dist/exercises.json` (auto-updated by build)
-* ✅ `locales/en/exercises.json` (auto-updated by build)
-* 📎 **Attach your compressed `.mp4` video directly to your GitHub PR description** (drag-and-drop into GitHub PR comments). Maintainers will upload it to the SparkyFitness media CDN.
+* ✅ The compressed MP4 video(s) in the same folder: `<folder>_m_9_16.mp4` (vertical, recommended) and optionally `<folder>_m_16_9.mp4` (horizontal), at most 2.5 MB each. Use `f` instead of `m` for a female model.
+* ✅ The thumbnail and animated previews that `pnpm media` creates from them: `<folder>_m_thumb.webp`, `<folder>_m_9_16.webp` and `<folder>_m_16_9.webp`. Editing on github.com? Skip these: after the merge, a workflow creates them from your video.
 
 ## AI Video Generation Prompts
 
 If you are using generative AI to produce new 3D anatomy exercise demonstration videos:
-* [Image-to-Video Prompt Guide](ImageToVideoExerciseGenerationPrompt.md) — When creating video demonstrations from 2D reference images or diagrams.
-* [Video-to-Video Prompt Guide](VideoToVideoExerciseGenerationPrompt.md) — When transforming existing raw exercise footage into consistent SparkyFitness branded demonstrations.
+* [Image-to-Video Prompt Guide](prompts/image-to-video.md) — When creating video demonstrations from 2D reference images or diagrams.
+* [Video-to-Video Prompt Guide](prompts/video-to-video.md) — When transforming existing raw exercise footage into consistent SparkyFitness branded demonstrations.
 
 ## Common Commands
 
@@ -316,4 +327,4 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDU
 
 Free for personal, educational and other non-commercial use; commercial use needs written permission. This covers the exercise data, translations, images and videos as well as the code. The SparkyFitness name, logo and character are not licensed for branding your own work. See [`LICENSE`](LICENSE).
 
-Parts of the exercise data come from [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset) (MIT, data and text only) and [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Unlicense). Their notices are in [`NOTICE.md`](NOTICE.md). Media from those datasets' sources (such as Gym visual) is not licensed to this project and must never be added here.
+Parts of the exercise data were adapted from open-source datasets under permissive licenses. The notices they require are in [`NOTICE.md`](NOTICE.md). No third-party media is included, and none may be added without a license.

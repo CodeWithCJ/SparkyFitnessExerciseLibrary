@@ -29,14 +29,11 @@ jobs:
       - name: Validate exercises
         run: node scripts/validate.mjs
       - name: Build catalog
+        # dist/ and locales/en/ are rebuilt and committed by the Sync catalog workflow after a merge,
+        # so contributors do not have to. The build only has to succeed here.
         run: node scripts/build.mjs
-      - name: Check dist/exercises.json is up to date
-        run: |
-          if ! git diff --quiet -- dist/ locales/; then
-            echo "::error::Run 'pnpm build' and commit the result."
-            git diff --stat -- dist/ locales/
-            exit 1
-          fi
+      - name: Test the catalog rules
+        run: node --test "scripts/lib/*.test.mjs"
 
   site:
     name: Build site
@@ -54,6 +51,8 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: docs/pnpm-lock.yaml
+      - name: Build catalog
+        run: node scripts/build.mjs
       - name: Build site
         working-directory: docs
         run: |

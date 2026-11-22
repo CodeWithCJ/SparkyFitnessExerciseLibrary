@@ -1,0 +1,97 @@
+name: Sync catalog
+
+# After a merge to main this finishes what contributors cannot do from github.com:
+#   - creates the animated previews and the thumbnail for new or changed videos (pnpm media)
+#   - rebuilds dist/exercises.json and locales/en/exercises.json (pnpm build)
+# and commits the result to main as one "chore: rebuild catalog" commit. Contributors only add the
+# exercise folder and its videos.
+#
+# Pushing to main needs a credential that the main ruleset lets bypass the pull request rule:
+# a repository deploy key (write access) stored as the SYNC_DEPLOY_KEY secret, and "Deploy keys" on
+# the ruleset's bypass list. GitHub does not allow the github-actions app itself on that list for a
+# personal repository. Without the secret the push is refused and the job fails with a message.
+# Pushes made with a deploy key start the normal push workflows, so the site is redeployed too.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'exercises/**'
+      - 'taxonomy/**'
+      - 'schema/**'
+      - 'scripts/build.mjs'
+      - 'scripts/lib/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-catalog
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Create previews, rebuild and commit
+    # Ignore the commit this workflow made itself.
+    if: "${{ github.event_name == 'workflow_dispatch' || !startsWith(github.event.head_commit.message, 'chore: rebuild catalog') }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # push the generated files
+    env:
+      EVENT_NAME: ${{ github.event_name }}
+      BEFORE: ${{ github.event.before }}
+      AFTER: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+          # Empty when the secret is not set: checkout then uses the default token, which cannot push to main.
+          ssh-key: ${{ secrets.SYNC_DEPLOY_KEY }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install ffmpeg and sharp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          npm install --no-package-lock --no-audit --no-fund
+      - name: Create previews, rebuild and commit
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # The exercise folders this push touched; every folder for a manual run or a first push.
+          if [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE:-}" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            FOLDERS=$(git diff --name-only "$BEFORE" "$AFTER" -- exercises | cut -d/ -f2 | sort -u)
+          else
+            FOLDERS=$(ls exercises)
+          fi
+
+          for attempt in 1 2 3; do
+            for folder in $FOLDERS; do
+              if [ -d "exercises/$folder" ]; then node scripts/optimize-media.mjs "$folder"; fi
+            done
+            node scripts/validate.mjs
+            node scripts/build.mjs
+
+            if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard -- exercises dist locales)" ]; then
+              echo "Nothing to generate or rebuild."
+              exit 0
+            fi
+            git add exercises dist locales
+            git commit -q -m "chore: rebuild catalog"
+            if git push origin HEAD:main; then
+              echo "Pushed the generated files."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt): main moved or the push is not allowed. Starting again from the latest main."
+            git fetch origin main
+            git checkout -q -B work origin/main
+          done
+
+          echo "::error::Could not push to main. Check that the SYNC_DEPLOY_KEY secret is set and that deploy keys can bypass the main branch ruleset."
+          exit 1
