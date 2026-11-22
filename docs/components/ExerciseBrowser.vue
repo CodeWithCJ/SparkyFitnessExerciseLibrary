@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { withBase } from 'vitepress';
 import BodyMap from './BodyMap.vue';
+import { MAP_MUSCLES } from './bodyMapData';
 import { equipmentIconSvg } from './equipmentIcons';
 
 interface Media {
@@ -56,10 +57,6 @@ const MUSCLES = [
   'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest', 'forearms', 'glutes',
   'hamstrings', 'lats', 'lower back', 'middle back', 'neck', 'quadriceps', 'shoulders', 'traps', 'triceps',
 ];
-const DRAWN = new Set([
-  'abdominals', 'biceps', 'calves', 'chest', 'forearms', 'glutes', 'hamstrings', 'lats',
-  'lower back', 'quadriceps', 'shoulders', 'traps', 'triceps',
-]);
 const SELECTS = [
   { key: 'category', label: 'Category', get: (e: Exercise) => e.taxonomy.category },
   { key: 'body_part', label: 'Body part', get: (e: Exercise) => e.taxonomy.body_part },
@@ -89,6 +86,7 @@ const state = reactive({
 });
 const limit = ref(PAGE);
 const showFilters = ref(false);
+const openPanel = ref<'muscles' | 'equipment' | null>(null);
 
 /* ---------- helpers ---------- */
 const media = (p?: string | null) => (p ? withBase('/' + p) : '');
@@ -156,7 +154,7 @@ const muscleCounts = computed(() =>
   )
 );
 const availableMuscles = computed(() => MUSCLES.filter((m) => (muscleCounts.value.get(m) ?? 0) > 0));
-const undrawnMuscles = MUSCLES.filter((m) => !DRAWN.has(m));
+const undrawnMuscles = MUSCLES.filter((m) => !MAP_MUSCLES.has(m));
 const activeCount = computed(
   () =>
     state.equipment.length +
@@ -169,6 +167,19 @@ function toggle(list: string[], v: string) {
   const i = list.indexOf(v);
   if (i >= 0) list.splice(i, 1);
   else list.push(v);
+}
+function togglePanel(panel: 'muscles' | 'equipment') {
+  openPanel.value = openPanel.value === panel ? null : panel;
+}
+// Close the open panel on an outside click or Escape. composedPath() is read at dispatch time, so it
+// still works when Vue has already re-rendered the clicked element away.
+function onDocClick(e: MouseEvent) {
+  if (!openPanel.value) return;
+  const inside = e.composedPath().some((el) => (el as Element).classList?.contains('pop'));
+  if (!inside) openPanel.value = null;
+}
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') openPanel.value = null;
 }
 function reset() {
   state.q = '';
@@ -283,6 +294,8 @@ const sentinel = ref<HTMLElement | null>(null);
 let io: IntersectionObserver | null = null;
 
 onMounted(async () => {
+  document.addEventListener('click', onDocClick);
+  document.addEventListener('keydown', onKey);
   const ex = readUrl();
   try {
     const res = await fetch(withBase('/data/exercises.json'));
@@ -304,142 +317,166 @@ onMounted(async () => {
   }, { rootMargin: '600px' });
   if (sentinel.value) io.observe(sentinel.value);
 });
-onBeforeUnmount(() => io?.disconnect());
+onBeforeUnmount(() => {
+  io?.disconnect();
+  document.removeEventListener('click', onDocClick);
+  document.removeEventListener('keydown', onKey);
+});
 </script>
 
 <template>
   <div class="xb">
-    <div class="xb-top">
-      <div class="search">
-        <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
-      </div>
-      <select v-model="state.lang" aria-label="Language" class="lang">
-        <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
-      </select>
-      <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
-        Filters<span v-if="activeCount"> ({{ activeCount }})</span>
-      </button>
-    </div>
-
-    <div class="xb-body">
-      <aside class="xb-filters" :class="{ open: showFilters }" aria-label="Filters">
-        <div class="fhead">
-          <strong>Filters</strong>
-          <button v-if="activeCount" type="button" class="link" @click="reset">Reset ({{ activeCount }})</button>
+    <div class="xb-toolbar">
+      <div class="tb-row main">
+        <div class="search">
+          <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
+        </div>
+        <div class="pop">
+          <button
+            type="button"
+            class="pop-btn"
+            :class="{ on: state.muscles.length || openPanel === 'muscles' }"
+            :aria-expanded="openPanel === 'muscles'"
+            @click="togglePanel('muscles')"
+          >
+            Muscles <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span
+            ><span class="caret" aria-hidden="true">▾</span>
+          </button>
+          <div v-if="openPanel === 'muscles'" class="panel panel-muscles">
+            <div class="panel-head">
+              <div class="seg small" role="group" aria-label="Figure">
+                <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
+                <button type="button" :aria-pressed="state.figure === 'female'" @click="state.figure = 'female'">Female</button>
+              </div>
+              <div class="seg small" role="group" aria-label="Muscle role">
+                <button type="button" :aria-pressed="state.role === 'primary'" @click="state.role = 'primary'">Primary only</button>
+                <button type="button" :aria-pressed="state.role === 'any'" @click="state.role = 'any'">Primary + secondary</button>
+              </div>
+            </div>
+            <BodyMap
+              :figure="state.figure"
+              mode="filter"
+              :selected="state.muscles"
+              :available="availableMuscles"
+              @toggle="(m) => toggle(state.muscles, m)"
+            />
+            <template v-if="undrawnMuscles.length">
+            <p class="muted small chips-label">Not drawn on the body map:</p>
+            <div class="chips">
+              <button
+                v-for="m in undrawnMuscles"
+                :key="m"
+                type="button"
+                class="chip-btn"
+                :aria-pressed="state.muscles.includes(m)"
+                :disabled="!muscleCounts.get(m)"
+                @click="toggle(state.muscles, m)"
+              >
+                {{ m }}
+              </button>
+            </div>
+            </template>
+          </div>
         </div>
 
-        <section>
-          <div class="sec-head">
-            <h4>Muscles</h4>
-            <div class="seg small" role="group" aria-label="Figure">
-              <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
-              <button type="button" :aria-pressed="state.figure === 'female'" @click="state.figure = 'female'">Female</button>
+        <div class="pop">
+          <button
+            type="button"
+            class="pop-btn"
+            :class="{ on: state.equipment.length || openPanel === 'equipment' }"
+            :aria-expanded="openPanel === 'equipment'"
+            @click="togglePanel('equipment')"
+          >
+            Equipment <span v-if="state.equipment.length" class="pill">{{ state.equipment.length }}</span
+            ><span class="caret" aria-hidden="true">▾</span>
+          </button>
+          <div v-if="openPanel === 'equipment'" class="panel panel-equipment">
+            <div class="equip">
+              <button
+                v-for="o in equipmentOptions"
+                :key="o.value"
+                type="button"
+                class="equip-tile"
+                :aria-pressed="state.equipment.includes(o.value)"
+                :disabled="!o.count && !state.equipment.includes(o.value)"
+                :title="`${o.value} (${o.count})`"
+                @click="toggle(state.equipment, o.value)"
+              >
+                <span class="equip-icon" v-html="icon(o.value, 26)" />
+                <span class="equip-name">{{ o.value }}</span>
+                <span class="equip-count">{{ o.count }}</span>
+              </button>
             </div>
           </div>
-          <BodyMap
-            :figure="state.figure"
-            mode="filter"
-            :selected="state.muscles"
-            :available="availableMuscles"
-            @toggle="(m) => toggle(state.muscles, m)"
-          />
-          <div class="chips">
-            <button
-              v-for="m in undrawnMuscles"
-              :key="m"
-              type="button"
-              class="chip-btn"
-              :aria-pressed="state.muscles.includes(m)"
-              :disabled="!muscleCounts.get(m)"
-              @click="toggle(state.muscles, m)"
-            >
-              {{ m }}
-            </button>
-          </div>
-          <div v-if="state.muscles.length" class="chips selected">
-            <button v-for="m in state.muscles" :key="m" type="button" class="chip-btn on" @click="toggle(state.muscles, m)">
-              {{ m }} ✕
-            </button>
-          </div>
-          <div class="seg small full" role="group" aria-label="Muscle role">
-            <button type="button" :aria-pressed="state.role === 'primary'" @click="state.role = 'primary'">Primary only</button>
-            <button type="button" :aria-pressed="state.role === 'any'" @click="state.role = 'any'">Primary + secondary</button>
-          </div>
-        </section>
+        </div>
 
-        <section>
-          <h4>Equipment</h4>
-          <div class="equip">
-            <button
-              v-for="o in equipmentOptions"
-              :key="o.value"
-              type="button"
-              class="equip-tile"
-              :aria-pressed="state.equipment.includes(o.value)"
-              :disabled="!o.count && !state.equipment.includes(o.value)"
-              :title="`${o.value} (${o.count})`"
-              @click="toggle(state.equipment, o.value)"
-            >
-              <span class="equip-icon" v-html="icon(o.value, 26)" />
-              <span class="equip-name">{{ o.value }}</span>
-              <span class="equip-count">{{ o.count }}</span>
-            </button>
-          </div>
-        </section>
+        <select v-model="state.lang" aria-label="Language" class="lang">
+          <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
+        </select>
+        <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
+          Filters<span v-if="activeCount"> ({{ activeCount }})</span>
+        </button>
+      </div>
 
-        <section>
-          <h4>Media</h4>
-          <div class="seg small full" role="group" aria-label="Media">
-            <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
-            <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">With video</button>
-            <button type="button" :aria-pressed="state.media === 'none'" @click="state.media = 'none'">No media</button>
-          </div>
-        </section>
+      <div class="tb-row filters" :class="{ open: showFilters }" role="group" aria-label="Filters">
+        <label v-for="s in SELECTS" :key="s.key" class="sel" :class="{ on: state.selects[s.key] }">
+          <select v-model="state.selects[s.key]" :aria-label="s.label">
+            <option value="">{{ s.label }}</option>
+            <option v-for="o in selectOptions[s.key]" :key="o.value" :value="o.value" :disabled="!o.count">
+              {{ label(o.value) }} ({{ o.count }})
+            </option>
+          </select>
+        </label>
 
-        <section class="selects">
-          <label v-for="s in SELECTS" :key="s.key">
-            <span>{{ s.label }}</span>
-            <select v-model="state.selects[s.key]">
-              <option value="">Any</option>
-              <option v-for="o in selectOptions[s.key]" :key="o.value" :value="o.value" :disabled="!o.count">
-                {{ label(o.value) }} ({{ o.count }})
-              </option>
-            </select>
-          </label>
-        </section>
-      </aside>
+        <div class="seg small" role="group" aria-label="Media">
+          <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
+          <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">With video</button>
+          <button type="button" :aria-pressed="state.media === 'none'" @click="state.media = 'none'">No media</button>
+        </div>
 
-      <section class="xb-results" aria-live="polite">
-        <p v-if="loading" class="muted">Loading exercises…</p>
-        <p v-else-if="error" class="muted">{{ error }}</p>
-        <template v-else>
-          <p class="muted count">{{ filtered.length.toLocaleString() }} of {{ all.length.toLocaleString() }} exercises</p>
-          <ul class="grid">
-            <li v-for="e in visible" :key="e.id" class="card">
-              <button type="button" @click="open(e)">
-                <div class="thumb">
-                  <img v-if="e.media?.thumbnail_path" :src="media(e.media.thumbnail_path)" :alt="tName(e)" loading="lazy" />
-                  <div v-else class="ph">
-                    <span class="ph-icon" v-html="icon(e.taxonomy.equipment, 40)" />
-                    <span>{{ e.taxonomy.primary_muscles.join(', ') }}</span>
-                  </div>
-                  <span v-if="hasVideo(e)" class="badge">▶ Video</span>
-                </div>
-                <div class="card-body">
-                  <h3>{{ tName(e) }}</h3>
-                  <p class="meta">
-                    <span class="mini-icon" v-html="icon(e.taxonomy.equipment, 14)" />
-                    {{ e.taxonomy.equipment }} · {{ e.taxonomy.level }}
-                  </p>
-                </div>
-              </button>
-            </li>
-          </ul>
-          <p v-if="!filtered.length" class="muted empty">No exercises match these filters.</p>
-        </template>
-        <div ref="sentinel" class="sentinel" aria-hidden="true" />
-      </section>
+        <button v-if="activeCount" type="button" class="link reset" @click="reset">Reset ({{ activeCount }})</button>
+      </div>
+
+      <div v-if="state.muscles.length || state.equipment.length" class="tb-row active-row">
+        <button v-for="m in state.muscles" :key="'m' + m" type="button" class="chip-btn on" @click="toggle(state.muscles, m)">
+          {{ m }} ✕
+        </button>
+        <button v-for="e in state.equipment" :key="'e' + e" type="button" class="chip-btn on" @click="toggle(state.equipment, e)">
+          {{ e }} ✕
+        </button>
+      </div>
     </div>
+
+    <section class="xb-results" aria-live="polite">
+      <p v-if="loading" class="muted">Loading exercises…</p>
+      <p v-else-if="error" class="muted">{{ error }}</p>
+      <template v-else>
+        <p class="muted count">{{ filtered.length.toLocaleString() }} of {{ all.length.toLocaleString() }} exercises</p>
+        <ul class="grid">
+          <li v-for="e in visible" :key="e.id" class="card">
+            <button type="button" @click="open(e)">
+              <div class="thumb">
+                <img v-if="e.media?.thumbnail_path" :src="media(e.media.thumbnail_path)" :alt="tName(e)" loading="lazy" />
+                <div v-else class="ph">
+                  <span class="ph-icon" v-html="icon(e.taxonomy.equipment, 40)" />
+                  <span>{{ e.taxonomy.primary_muscles.join(', ') }}</span>
+                </div>
+                <span v-if="hasVideo(e)" class="badge">▶ Video</span>
+              </div>
+              <div class="card-body">
+                <h3>{{ tName(e) }}</h3>
+                <p class="meta">
+                  <span class="mini-icon" v-html="icon(e.taxonomy.equipment, 14)" />
+                  {{ e.taxonomy.equipment }} · {{ e.taxonomy.level }}
+                </p>
+              </div>
+            </button>
+          </li>
+        </ul>
+        <p v-if="!filtered.length" class="muted empty">No exercises match these filters.</p>
+      </template>
+      <div ref="sentinel" class="sentinel" aria-hidden="true" />
+    </section>
 
     <dialog ref="dialog" class="xb-dialog" aria-labelledby="xb-title" @close="close" @click.self="dialog?.close()">
       <div v-if="current" class="detail">
@@ -493,7 +530,10 @@ onBeforeUnmount(() => io?.disconnect());
         </div>
 
         <div class="info">
-          <p class="muted mono">{{ current.id }}</p>
+          <div class="id-row">
+            <p class="muted mono">{{ current.id }}</p>
+            <a class="edit-link" :href="withBase(`/contribute?edit=${current.id}`)">✎ Suggest an edit</a>
+          </div>
           <h2 id="xb-title">{{ tName(current) }}</h2>
           <p v-if="current.aliases?.length" class="muted">Also: {{ current.aliases.join(', ') }}</p>
 
@@ -541,7 +581,9 @@ onBeforeUnmount(() => io?.disconnect());
 <style scoped>
 .xb {
   --r: 12px;
+  --pad: 24px;
   margin-top: 8px;
+  padding: 0 var(--pad);
 }
 .muted {
   color: var(--vp-c-text-2);
@@ -578,20 +620,37 @@ select:focus {
   outline-offset: -1px;
 }
 
-/* top bar */
-.xb-top {
+/* toolbar: search, filters and active chips stay at the top while the results scroll */
+.xb-toolbar {
+  background: var(--vp-c-bg);
+  margin: 0 calc(var(--pad) * -1) 16px;
+  padding: 10px var(--pad) 8px;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+@media (min-width: 861px) {
+  .xb-toolbar {
+    position: sticky;
+    top: var(--vp-nav-height);
+    z-index: 15;
+  }
+}
+.tb-row {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 20px;
+}
+.tb-row + .tb-row {
+  margin-top: 8px;
 }
 .search {
   flex: 1;
+  min-width: 200px;
 }
 .search input {
   width: 100%;
-  padding: 12px 14px;
-  font-size: 16px;
+  padding: 10px 14px;
+  font-size: 15px;
   border-radius: 10px;
 }
 .btn {
@@ -611,49 +670,85 @@ select:focus {
   display: none;
 }
 
-/* layout */
-.xb-body {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
+/* filter bar */
+.pop {
+  position: relative;
 }
-.xb-filters {
-  position: sticky;
-  top: calc(var(--vp-nav-height) + 16px);
-  max-height: calc(100vh - var(--vp-nav-height) - 32px);
-  overflow: auto;
-  background: var(--vp-c-bg-soft);
-  border-radius: var(--r);
-  padding: 16px;
+.pop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
 }
-.fhead {
+.pop-btn:hover,
+.pop-btn.on {
+  border-color: var(--vp-c-brand-1);
+}
+.pop-btn.on {
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
+.caret {
+  font-size: 10px;
+  opacity: 0.7;
+}
+.pill {
+  min-width: 18px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--vp-c-brand-1);
+  color: var(--vp-c-white);
+  border-radius: 999px;
+  padding: 0 6px;
+}
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  box-shadow: var(--vp-shadow-3);
+  padding: 14px;
+}
+.panel-muscles {
+  width: 400px;
+}
+.panel-equipment {
+  width: 420px;
+}
+.panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 8px;
 }
-.xb-filters section {
-  padding: 12px 0;
-  border-top: 1px solid var(--vp-c-divider);
-}
-.xb-filters section:first-of-type {
-  border-top: 0;
-}
-.xb-filters h4 {
-  margin: 0 0 8px;
+.sel select {
+  width: 120px;
+  padding: 5px 8px;
   font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--vp-c-text-2);
+  border-radius: 8px;
+  text-transform: capitalize;
+  text-overflow: ellipsis;
 }
-.sec-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.sel.on select {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
 }
-.sec-head h4 {
-  margin: 0;
+.reset {
+  margin-left: auto;
+}
+.active-row {
+  gap: 6px;
 }
 
 /* segmented */
@@ -663,13 +758,6 @@ select:focus {
   border-radius: 8px;
   overflow: hidden;
   background: var(--vp-c-bg);
-}
-.seg.full {
-  display: flex;
-  margin-top: 8px;
-}
-.seg.full button {
-  flex: 1;
 }
 .seg button {
   border: 0;
@@ -690,6 +778,9 @@ select:focus {
 }
 
 /* chips */
+.chips-label {
+  margin: 10px 0 0;
+}
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -714,7 +805,7 @@ select:focus {
 /* equipment tiles */
 .equip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 .equip-tile {
@@ -750,21 +841,6 @@ select:focus {
 .equip-count {
   font-size: 10px;
   color: var(--vp-c-text-3);
-}
-
-.selects label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 13px;
-}
-.selects span {
-  display: block;
-  color: var(--vp-c-text-2);
-  margin-bottom: 4px;
-}
-.selects select {
-  width: 100%;
-  text-transform: capitalize;
 }
 
 /* results */
@@ -972,6 +1048,26 @@ select:focus {
 .dot.s {
   background: #f5b83d;
 }
+.id-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 44px;
+}
+.edit-link {
+  font-size: 13px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 3px 10px;
+  text-decoration: none;
+  color: var(--vp-c-text-1);
+  white-space: nowrap;
+}
+.edit-link:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
 .info h2 {
   margin: 4px 0 4px !important;
   padding: 0 !important;
@@ -1046,22 +1142,31 @@ select:focus {
 }
 
 @media (max-width: 860px) {
+  .xb {
+    --pad: 12px;
+  }
+  .tb-row.main {
+    position: relative;
+  }
   .only-mobile {
     display: inline-block;
   }
   .lang {
     max-width: 110px;
   }
-  .xb-body {
-    grid-template-columns: 1fr;
-  }
-  .xb-filters {
-    position: static;
-    max-height: none;
+  .tb-row.filters {
     display: none;
   }
-  .xb-filters.open {
-    display: block;
+  .tb-row.filters.open {
+    display: flex;
+  }
+  .pop {
+    position: static;
+  }
+  .panel {
+    left: 0;
+    right: 0;
+    width: auto;
   }
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
