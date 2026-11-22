@@ -39,3 +39,7 @@ SOFTWARE.
 Source: https://github.com/yuhonas/free-exercise-db
 Used: exercise names, attributes and instructions.
 License: The Unlicense (public domain dedication). No notice is required; it is credited here as thanks.
+
+## Body map figures (browse site)
+
+Source: the SparkyFitness app (`muscle-male.svg`, `muscle-female.svg`), copied to `docs/src/public/images/`. The female figure's paths were converted from [react-native-body-highlighter](https://github.com/HichamELBSI/react-native-body-highlighter) 3.2.0 (MIT, Copyright (c) 2022 ELABBASSI Hicham). The full notice stays in the header of `muscle-female.svg`.

@@ -4,6 +4,10 @@ Exercise catalog, media assets, and multilingual instruction database for the Sp
 
 Contains **1,908 canonical exercises** with comprehensive biomechanical metadata, equipment taxonomy, muscle engagement targets, and localized instructions across 9 languages.
 
+## Browse the Catalog
+
+Search and filter every exercise by muscle, equipment, level and more, play its video and read its steps in 9 languages: <https://codewithcj.github.io/SparkyFitnessExerciseLibrary/>. To run the site locally, run `pnpm install` in `docs/`, then `pnpm docs:dev` from the repository root.
+
 ## Sample Videos
 
 Demonstrations generated with the SparkyFitness character and gym. Muscle highlights: red/orange for primary, yellow for secondary, blue for stabilizers. Click a preview to open the full MP4.
@@ -294,6 +298,8 @@ pnpm exercises           # Interactive exercise inspector & search CLI (e.g. pnp
 pnpm validate            # Validates catalog IDs, folder and media names, taxonomy, and video codec/sizes
 pnpm build               # Compiles dist/exercises.json with auto-discovered media & syncs Weblate
 pnpm media               # In-place video compression and auto-generation of WebP previews
+pnpm docs:dev            # Runs the browse site locally (run pnpm install in docs/ first)
+pnpm docs:build          # Builds the browse site into docs/.vitepress/dist
 ```
 
 ## Using the Catalog
