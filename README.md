@@ -142,9 +142,21 @@ The `media` block is optional; here it only picks the thumbnail frame (`thumbnai
   "animation_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
   "animation_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.webp",
   "thumbnail_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_thumb.webp",
-  "image_path": null
+  "image_path": null,
+  "male": {
+    "video_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4",
+    "video_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4",
+    "video_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.mp4",
+    "animation_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
+    "animation_vertical_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.webp",
+    "animation_horizontal_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.webp",
+    "thumbnail_path": "exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_thumb.webp",
+    "image_path": null
+  }
 }
 ```
+
+The flat keys are the default set (male, or female when that is all there is). `male` and `female` list each model's own files and are only present when that model has media.
 
 ## Media Standards & Auto-Discovery
 
@@ -279,11 +291,10 @@ pnpm validate   # Must pass with zero errors
 You do **not** need to run `pnpm build` or commit `dist/` or `locales/`: after your PR is merged, a workflow rebuilds and commits them. Run `pnpm build` only to try the result locally (for example with `pnpm exercises` or `pnpm docs:dev`).
 
 ### 5. What to Commit & Submit in PR
-Git automatically ignores `.mp4` video files to prevent repository bloat. In your pull request, include:
+Videos live in the exercise folder and are committed like any other file. In your pull request, include:
 * ✅ `exercises/<folder>/exercise.json`
-* ✅ `exercises/<folder>/<folder>_m_thumb.webp` (static card thumbnail)
-* ✅ `exercises/<folder>/<folder>_m_9_16.webp` / `<folder>_m_16_9.webp` (animated WebP loops)
-* 📎 **Attach your compressed `.mp4` video directly to your GitHub PR description** (drag-and-drop into GitHub PR comments). Maintainers will upload it to the SparkyFitness media CDN.
+* ✅ The compressed MP4 video(s) in the same folder: `<folder>_m_9_16.mp4` (vertical, recommended) and optionally `<folder>_m_16_9.mp4` (horizontal), at most 2.5 MB each. Use `f` instead of `m` for a female model.
+* ✅ The thumbnail and animated previews that `pnpm media` creates from them: `<folder>_m_thumb.webp`, `<folder>_m_9_16.webp` and `<folder>_m_16_9.webp`. Editing on github.com? Skip these: after the merge, a workflow creates them from your video.
 
 ## AI Video Generation Prompts
 

@@ -1,5 +1,4 @@
-# Ignore MP4 videos specifically inside exercise folders (prevents git bloat)
-exercises/**/*.mp4
+# Scratch files made by pnpm media (videos themselves are committed in the exercise folder)
 exercises/**/candidates/
 exercises/**/_temp_*
 

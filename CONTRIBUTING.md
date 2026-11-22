@@ -28,7 +28,7 @@ Every PR must:
 
 1. Fork the repository and create a branch.
 2. Commit with [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`, ...). The PR title must start with a type too.
-3. Open a PR and fill in the template. Attach any new MP4 to the PR description; videos are not committed, and a maintainer hosts them.
+3. Open a PR and fill in the template. Add any new videos to the exercise folder, next to `exercise.json`, with the exact names the generator shows (each at most 2.5 MB). You do not need to create the previews and the thumbnail: after the merge, a workflow makes them from your video.
 
 ## Automated PR checks
 
