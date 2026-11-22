@@ -12,6 +12,7 @@ Guide for AI tools and developers working in this repository: the SparkyFitness 
 - `taxonomy/` - allowed muscles, equipment, modalities, and `catalog-codes.json` (the ID rules).
 - `schema/exercise.schema.json` - the `exercise.json` schema.
 - `scripts/` - `validate.mjs`, `build.mjs`, `optimize-media.mjs`, `list.mjs`, `prepare-site.mjs`, and `lib/` (shared ID and video-tag helpers).
+- `prompts/` - the AI video generation prompts (`image-to-video.md`, `video-to-video.md`) and the character and gym reference images in `prompts/reference/`. The site shows the prompts as guide pages.
 - `docs/` - the VitePress browse site, published to GitHub Pages. See below.
 - `.github/` - workflows, issue forms, the PR template, and `scripts/pr-policy.cjs` (PR automation rules).
 

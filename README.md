@@ -288,8 +288,8 @@ Git automatically ignores `.mp4` video files to prevent repository bloat. In you
 ## AI Video Generation Prompts
 
 If you are using generative AI to produce new 3D anatomy exercise demonstration videos:
-* [Image-to-Video Prompt Guide](ImageToVideoExerciseGenerationPrompt.md) — When creating video demonstrations from 2D reference images or diagrams.
-* [Video-to-Video Prompt Guide](VideoToVideoExerciseGenerationPrompt.md) — When transforming existing raw exercise footage into consistent SparkyFitness branded demonstrations.
+* [Image-to-Video Prompt Guide](prompts/image-to-video.md) — When creating video demonstrations from 2D reference images or diagrams.
+* [Video-to-Video Prompt Guide](prompts/video-to-video.md) — When transforming existing raw exercise footage into consistent SparkyFitness branded demonstrations.
 
 ## Common Commands
 

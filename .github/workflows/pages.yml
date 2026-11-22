@@ -9,6 +9,7 @@ on:
       - 'dist/**'
       - 'locales/**'
       - 'exercises/**'
+      - 'prompts/**'
       - 'scripts/prepare-site.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:

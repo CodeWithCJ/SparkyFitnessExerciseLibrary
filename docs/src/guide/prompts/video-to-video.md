@@ -2,4 +2,4 @@
 title: Video-to-video prompt
 ---
 
-<!--@include: ../../../../VideoToVideoExerciseGenerationPrompt.md-->
+<!--@include: ../../../../prompts/video-to-video.md-->
