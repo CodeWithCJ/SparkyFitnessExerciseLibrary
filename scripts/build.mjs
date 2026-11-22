@@ -92,8 +92,8 @@ for (const folder of exerciseFolders) {
     }
   }
 
-  // Auto-discover media by convention with optional overrides from exercise.json
-  const discoveredMedia = discoverMedia(folder, path.join(exercisesDir, folder), exercise.media);
+  // Auto-discover media by file name
+  const discoveredMedia = discoverMedia(folder, path.join(exercisesDir, folder));
 
   // Generate continuous instructions from steps for DB backward-compatibility
   // The schema path and the upstream source ids stay in exercise.json but are not published in dist.

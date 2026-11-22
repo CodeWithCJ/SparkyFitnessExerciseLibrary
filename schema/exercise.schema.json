@@ -197,57 +197,13 @@
     },
     "media": {
       "type": "object",
+      "description": "Optional. Media files are found by their names, so only the thumbnail frame is set here.",
       "additionalProperties": false,
       "properties": {
-        "video_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to default MP4 video demonstration within the exercise directory"
-        },
-        "video_vertical_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to vertical 9:16 MP4 video demonstration within the exercise directory"
-        },
-        "video_horizontal_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to horizontal 16:9 MP4 video demonstration within the exercise directory"
-        },
-        "animation_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to looping preview animation within the exercise directory"
-        },
-        "animation_vertical_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to vertical 9:16 looping preview animation within the exercise directory"
-        },
-        "animation_horizontal_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to horizontal 16:9 looping preview animation within the exercise directory"
-        },
-        "gif_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Legacy fallback filename to looping preview animated GIF within the exercise directory"
-        },
-        "thumbnail_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Relative filename to card thumbnail image within the exercise directory"
-        },
         "thumbnail_timestamp": {
           "type": "number",
           "minimum": 0,
-          "description": "Optional timestamp in seconds to extract the defining action thumbnail frame"
-        },
-        "image_path": {
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9_.-]+$",
-          "description": "Optional fallback static diagram filename within the exercise directory"
+          "description": "Optional timestamp in seconds of the video frame used for the card thumbnail (default: 30% into the video). Applies when the thumbnail is created; to change an existing thumbnail, delete it so it is created again."
         }
       }
     },

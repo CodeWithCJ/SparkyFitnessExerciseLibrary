@@ -84,34 +84,6 @@ for (const folder of exerciseFolders) {
     }
   }
 
-  // 4. Validate explicit media overrides (committed image/animation/thumbnail files must exist if declared and stay inside exercise dir)
-  const explicitMediaFiles = [
-    exercise.media?.thumbnail_path,
-    exercise.media?.animation_path,
-    exercise.media?.animation_vertical_path,
-    exercise.media?.animation_horizontal_path,
-    exercise.media?.image_path,
-  ].filter(Boolean);
-
-  for (const mediaFile of explicitMediaFiles) {
-    if (typeof mediaFile !== 'string' || mediaFile.includes('..') || path.isAbsolute(mediaFile)) {
-      console.error(`❌ [${folder}] Invalid media file path (must be a relative filename without '..'): '${mediaFile}'`);
-      errorCount++;
-      continue;
-    }
-    const localPath = path.resolve(exercisePath, mediaFile);
-    const rel = path.relative(exercisePath, localPath);
-    if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      console.error(`❌ [${folder}] Media file path escapes exercise directory: '${mediaFile}'`);
-      errorCount++;
-      continue;
-    }
-    if (!fs.existsSync(localPath)) {
-      console.error(`❌ [${folder}] Explicit media file declared in exercise.json does not exist: '${mediaFile}'`);
-      errorCount++;
-    }
-  }
-
   // 4b. Media file names: <folder>_<m|f>_<9_16|16_9|thumb>.<ext>, and a path short enough for Windows
   const namePattern = mediaNamePattern(folder);
   for (const entry of fs.readdirSync(exercisePath, { withFileTypes: true })) {
@@ -125,31 +97,10 @@ for (const folder of exerciseFolders) {
     }
   }
 
-  // 5. Validate Video Assets (auto-discovered on local disk + explicit media overrides)
+  // 5. Validate video files on disk
   const localFiles = fs.readdirSync(exercisePath);
-  const explicitVideos = [
-    exercise.media?.video_path,
-    exercise.media?.video_vertical_path,
-    exercise.media?.video_horizontal_path,
-  ].filter(Boolean);
-
-  for (const vFile of explicitVideos) {
-    if (typeof vFile !== 'string' || vFile.includes('..') || path.isAbsolute(vFile)) {
-      console.error(`❌ [${folder}] Invalid video file path (must be a relative filename without '..'): '${vFile}'`);
-      errorCount++;
-    } else {
-      const localPath = path.resolve(exercisePath, vFile);
-      const rel = path.relative(exercisePath, localPath);
-      if (rel.startsWith('..') || path.isAbsolute(rel)) {
-        console.error(`❌ [${folder}] Video file path escapes exercise directory: '${vFile}'`);
-        errorCount++;
-      }
-    }
-  }
-
   const videoFiles = new Set([
     ...localFiles.filter((f) => f.endsWith('.mp4') && !f.startsWith('_temp_')),
-    ...explicitVideos,
   ].filter(Boolean));
 
   for (const videoFileName of videoFiles) {

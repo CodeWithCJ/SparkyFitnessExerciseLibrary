@@ -194,7 +194,7 @@ pnpm media candidates sf-core-oth-0002
 pnpm media force-all
 ```
 
-*(If you wish to specify an exact timestamp for the thumbnail in `exercise.json`, you can optionally add `"media": { "thumbnail_timestamp": 3.0 }`).*
+*(To choose the thumbnail frame yourself, add `"media": { "thumbnail_timestamp": 3.0 }` to `exercise.json`. It is the only thing the `media` block can hold. It applies when the thumbnail is created, so to change an existing thumbnail, delete `<folder>_<m|f>_thumb.webp` and run `pnpm media` again.)*
 
 ## Taxonomy Reference
 
@@ -207,9 +207,9 @@ pnpm media force-all
 * **Muscles (`primary_muscles` / `secondary_muscles`):**  
   `abdominals` · `abductors` · `adductors` · `biceps` · `calves` · `chest` · `forearms` · `glutes` · `hamstrings` · `lats` · `lower back` · `middle back` · `neck` · `quadriceps` · `shoulders` · `traps` · `triceps`
 * **Mechanic & Force:**  
-  `mechanic`: `compound` · `isolation` · `other`  
-  `force`: `push` · `pull` · `static` · `other`  
-  `level`: `beginner` · `intermediate` · `advanced`
+  `mechanic`: `compound` · `isolation` (or empty)  
+  `force`: `push` · `pull` · `static` (or empty)  
+  `level`: `beginner` · `intermediate` · `expert`
 
 *(See the `taxonomy/` folder for complete schema definitions).*
 
@@ -279,7 +279,7 @@ Every exercise gets a catalog ID of the form **`sf-<body>-<equip>-<number>`**, a
   # Preview candidate thumbnail frames to pick the best action frame timestamp:
   pnpm media candidates sf-core-oth-0002
   ```
-  *This automatically compresses videos to ≤ 1.5 MB, mutes audio (`-an`), adds `+faststart`, and generates:*
+  *This re-encodes any video over 1.5 MB (the 2.5 MB cap is a hard limit), mutes audio (`-an`), adds `+faststart`, and generates:*
   * `<folder>_m_thumb.webp`: Lightweight static card thumbnail (360x640 / 640x360, ~15–25 KB).
   * `<folder>_m_9_16.webp` / `<folder>_m_16_9.webp`: Full-duration animated WebP preview loops (~160–460 KB) with 24-bit true color for smooth mobile & web playback and compact offline caching.
 

@@ -26,6 +26,6 @@ An ID never changes after it is published, even if the exercise is later reclass
 | `taxonomy.level` | `beginner`, `intermediate`, `expert` |
 | `taxonomy.mechanic` | `compound`, `isolation` |
 | `biomechanics` | Laterality, movement plane, default tempo, demonstration reps |
-| `media` | Video, animation and thumbnail paths, filled in by the build |
+| `media` | Video, animation and thumbnail paths, found by file name and added by the build. In `exercise.json` it can only hold `thumbnail_timestamp` |
 
 The JSON schema in `schema/exercise.schema.json` is the full reference.

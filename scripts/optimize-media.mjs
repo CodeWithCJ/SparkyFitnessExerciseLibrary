@@ -118,13 +118,10 @@ async function processExercise(dirName) {
 
   console.log(`\n📦 [${dirName}] ${data.name || ''}`);
 
-  // Auto-discover all mp4 files in folder + any explicit media paths
+  // Every mp4 in the folder
   const localFiles = fs.readdirSync(exDir);
   const candidateVideos = Array.from(new Set([
     ...localFiles.filter((f) => f.endsWith('.mp4') && !f.startsWith('_temp_')),
-    media.video_path,
-    media.video_vertical_path,
-    media.video_horizontal_path,
   ].filter(Boolean)));
 
   const videoFiles = candidateVideos.filter((f) => {
@@ -220,7 +217,7 @@ async function processExercise(dirName) {
   }
 
   // 2. Generate WebP Thumbnail (_thumb.webp) if missing or --force
-  const thumbFileName = media.thumbnail_path || `${dirName}_${modelLetterOf(path.basename(primaryVideoPath))}_thumb.webp`;
+  const thumbFileName = `${dirName}_${modelLetterOf(path.basename(primaryVideoPath))}_thumb.webp`;
   const thumbPath = resolveInsideExerciseDir(exDir, thumbFileName, 'thumbnail_path');
 
   if (isForce || !fs.existsSync(thumbPath)) {
@@ -324,19 +321,8 @@ async function processExercise(dirName) {
     } catch {}
   }
 
-  const referencedFiles = new Set([
-    media.animation_path,
-    media.animation_vertical_path,
-    media.animation_horizontal_path,
-    media.gif_path,
-    media.thumbnail_path,
-    media.image_path,
-  ].filter(Boolean));
-
   const leftoverFiles = fs.readdirSync(exDir);
   for (const f of leftoverFiles) {
-    if (referencedFiles.has(f)) continue;
-
     if (f.startsWith('_temp_') || f.includes('_anim.webp')) {
       try {
         fs.unlinkSync(path.join(exDir, f));
