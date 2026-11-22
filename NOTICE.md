@@ -1,14 +1,12 @@
-# Third-Party Notices
+# Notices
 
-The SparkyFitness Exercise Library as a whole (including its curation, biomechanics, added exercises, translations, media, prompts and tooling) is licensed under the terms in [`LICENSE`](LICENSE): free for non-commercial use, commercial use needs written permission.
+The SparkyFitness Exercise Library is licensed under [`LICENSE`](LICENSE): free for non-commercial use, and commercial use needs written permission.
 
-Parts of the exercise data were derived from the datasets below. Those parts stay available under their original licenses, which are reproduced here as those licenses require.
+Parts of the exercise data were adapted from open-source datasets published under permissive licenses, then curated, extended and translated for SparkyFitness. The notice that one of those licenses requires is reproduced below, and travels with every release. No images or videos from third-party datasets are included.
 
-## exercises-dataset (Hasan Emir Yıldırım)
+## Exercise data
 
-Source: https://github.com/hasaneyldrm/exercises-dataset
-Used: exercise names, categories, body-part/equipment/target data, and instruction text and translations.
-Not used: the upstream `images/` and `videos/` media. That media is © Gym visual (https://gymvisual.com/), is excluded from the upstream MIT license, and must not be added to this repository or used as source footage for generated videos.
+Includes names, categories, muscle and equipment data, and instruction text and translations adapted from an open-source dataset:
 
 ```text
 MIT License
@@ -34,12 +32,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## free-exercise-db (yuhonas)
-
-Source: https://github.com/yuhonas/free-exercise-db
-Used: exercise names, attributes and instructions.
-License: The Unlicense (public domain dedication). No notice is required; it is credited here as thanks.
-
 ## Body map figures (browse site)
 
-Source: the SparkyFitness app (`muscle-male.svg`, `muscle-female.svg`), copied to `docs/src/public/images/`. The female figure's paths were converted from [react-native-body-highlighter](https://github.com/HichamELBSI/react-native-body-highlighter) 3.2.0 (MIT, Copyright (c) 2022 ELABBASSI Hicham). The full notice stays in the header of `muscle-female.svg`.
+The female figure's paths were converted from react-native-body-highlighter 3.2.0 (MIT, Copyright (c) 2022 ELABBASSI Hicham). The full notice is kept in the header of `muscle-female.svg`.

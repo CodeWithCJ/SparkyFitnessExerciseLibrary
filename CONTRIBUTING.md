@@ -6,9 +6,9 @@ You can browse the catalog at <https://codewithcj.github.io/SparkyFitnessExercis
 
 ## What helps most
 
-- **Fixing exercise data**: a wrong muscle, equipment, step or typo. Open a PR, or an issue with the "Exercise data issue or request" form.
-- **New exercises**: follow "Contributing an Exercise" in the README.
-- **Translations**: edit only `locales/en/`. Every other language is synced through Weblate, and PRs that change them are rejected.
+- **Fixing exercise data**: a wrong muscle, equipment, step or typo. Every exercise on the [site](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/browse) has a **Suggest an edit** button that opens it prefilled in the generator. You can also open an issue with the "Exercise data issue or request" form.
+- **New exercises**: use the [exercise generator](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/contribute). It builds `exercise.json` and works out the ID, folder and file names, then opens the file on GitHub as a pull request. Or follow "Contributing an Exercise" in the README.
+- **Translations**: the English text is in each exercise's `exercise.json`; `locales/` is generated, so don't edit it. Other languages are synced through Weblate, and PRs that change them are rejected.
 - **Media**: a demonstration video for an exercise that has none (see the media rules below).
 - **Tooling and the browse site**: open an issue first for anything larger than a small fix, so we can agree on the approach before you build it.
 
@@ -16,7 +16,7 @@ You can browse the catalog at <https://codewithcj.github.io/SparkyFitnessExercis
 
 Every PR must:
 
-- **Pass the checks.** Run `pnpm validate` and `pnpm build` locally, and commit the rebuilt `dist/exercises.json` and `locales/en/exercises.json`. CI fails when they are out of date. For site changes, `cd docs && pnpm install && pnpm run build` must succeed.
+- **Pass the checks.** Run `pnpm validate` locally; CI runs it and a full build. You do not need to commit `dist/` or `locales/`: a workflow rebuilds and commits them after the merge. For site changes, `cd docs && pnpm install && pnpm run build` must succeed.
 - **Keep IDs stable.** Never change or reuse an existing exercise ID. New IDs are `sf-<body>-<equip>-<number>` with the next free number (see the README).
 - **Say where data and media came from**, in the "Source of new data or media" section of the PR template.
 - **Use only media you have the right to.** Never add images or videos from other exercise datasets or apps. Anyone shown in a video, or used as source footage, must have agreed to its use. Tick the "Rights & consent" box when the PR adds or changes media.
