@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync, execFileSync } from 'node:child_process';
-import { ID_PATTERN, SLUG_PATTERN, SLUG_MAX_LENGTH, mediaNamePattern } from './lib/catalog.mjs';
+import { ID_PATTERN, mediaNamePattern } from './lib/catalog.mjs';
+import { validateExercise } from './lib/exercise-form.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,7 @@ const exerciseFolders = fs
 let errorCount = 0;
 let warningCount = 0;
 const seenIds = new Set();
+const checkContext = { idPattern: ID_PATTERN, validMuscles, validEquipment, validModalities };
 
 // Longest allowed path inside the repository. Keeps clones under Windows' 260 character limit.
 const MAX_RELATIVE_PATH_LENGTH = 160;
@@ -63,77 +65,22 @@ for (const folder of exerciseFolders) {
     continue;
   }
 
-  // 1. Validate ID conventions
-  if (!exercise.id) {
-    console.error(`❌ [${folder}] Missing id`);
+  // 1-3. Field checks shared with the exercise generator (ID, slug, taxonomy, name, steps)
+  for (const problem of validateExercise(exercise, checkContext)) {
+    console.error(`❌ [${folder}] ${problem}`);
     errorCount++;
-  } else {
-    if (!ID_PATTERN.test(exercise.id)) {
-      console.error(`❌ [${folder}] id must look like 'sf-core-oth-0001' (sf-<body>-<equip>-<number>). Got: '${exercise.id}'`);
-      errorCount++;
-    }
+  }
+
+  // 1b. Checks that need the folder or the other exercises
+  if (exercise.id) {
     if (seenIds.has(exercise.id)) {
       console.error(`❌ [${folder}] Duplicate id '${exercise.id}'`);
       errorCount++;
     }
     seenIds.add(exercise.id);
-
-    if (typeof exercise.slug !== 'string' || !SLUG_PATTERN.test(exercise.slug) || exercise.slug.length > SLUG_MAX_LENGTH) {
-      console.error(`❌ [${folder}] slug must be lowercase letters, digits and underscores, at most ${SLUG_MAX_LENGTH} characters. Got: '${exercise.slug}'`);
-      errorCount++;
-    } else if (folder !== `${exercise.id}_${exercise.slug}`) {
+    if (typeof exercise.slug === 'string' && folder !== `${exercise.id}_${exercise.slug}`) {
       console.error(`❌ [${folder}] folder name must be '<id>_<slug>' = '${exercise.id}_${exercise.slug}'`);
       errorCount++;
-    }
-    if ('numeric_id' in exercise) {
-      console.error(`❌ [${folder}] 'numeric_id' was removed. The id is the catalog ID.`);
-      errorCount++;
-    }
-  }
-
-  // 2. Validate taxonomy
-  if (!exercise.taxonomy) {
-    console.error(`❌ [${folder}] Missing taxonomy object`);
-    errorCount++;
-  } else {
-    if (!validModalities.has(exercise.taxonomy.modality)) {
-      console.error(`❌ [${folder}] Invalid modality: '${exercise.taxonomy.modality}'`);
-      errorCount++;
-    }
-    if (!validEquipment.has(exercise.taxonomy.equipment)) {
-      console.error(`❌ [${folder}] Invalid equipment: '${exercise.taxonomy.equipment}'`);
-      errorCount++;
-    }
-    for (const m of exercise.taxonomy.primary_muscles || []) {
-      if (!validMuscles.has(m)) {
-        console.error(`❌ [${folder}] Invalid primary muscle: '${m}'`);
-        errorCount++;
-      }
-    }
-    for (const m of exercise.taxonomy.secondary_muscles || []) {
-      if (!validMuscles.has(m)) {
-        console.error(`❌ [${folder}] Invalid secondary muscle: '${m}'`);
-        errorCount++;
-      }
-    }
-  }
-
-  // 3. Validate required fields, steps, and cues
-  if (!exercise.name || typeof exercise.name !== 'string' || exercise.name.trim().length < 2) {
-    console.error(`❌ [${folder}] Missing or invalid 'name' (must be a string of at least 2 characters)`);
-    errorCount++;
-  }
-
-  if (!Array.isArray(exercise.steps) || exercise.steps.length === 0) {
-    console.error(`❌ [${folder}] 'steps' must be a non-empty array of strings`);
-    errorCount++;
-  } else {
-    for (let i = 0; i < exercise.steps.length; i++) {
-      const step = exercise.steps[i];
-      if (typeof step !== 'string' || step.trim().length < 5) {
-        console.error(`❌ [${folder}] steps[${i}] must be a descriptive string of at least 5 characters. Got: ${JSON.stringify(step)}`);
-        errorCount++;
-      }
     }
   }
 
