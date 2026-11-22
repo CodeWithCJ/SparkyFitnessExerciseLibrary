@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "Karın Kasları",
+    "abductors": "Abduktörler",
+    "adductors": "Adduktörler",
+    "biceps": "Biseps",
+    "calves": "Baldırlar",
+    "chest": "Göğüs",
+    "forearms": "Önkollar",
+    "glutes": "Kalça Kasları",
+    "hamstrings": "Arka Bacak",
+    "lats": "Kanat Kasları",
+    "lower back": "Alt Sırt",
+    "middle back": "Orta Sırt",
+    "neck": "Boyun",
+    "quadriceps": "Ön Bacak",
+    "shoulders": "Omuzlar",
+    "traps": "Trapez",
+    "triceps": "Triseps"
+  },
+  "equipment": {
+    "barbell": "Halter",
+    "dumbbell": "Dambıl",
+    "kettlebells": "Kettlebell",
+    "cable": "Kablo",
+    "machine": "Makine",
+    "bands": "Bantlar",
+    "body only": "Yalnızca Vücut",
+    "medicine ball": "Sağlık Topu",
+    "exercise ball": "Pilates Topu",
+    "foam roll": "Köpük Rulo",
+    "e-z curl bar": "E-Z Bar",
+    "other": "Diğer"
+  },
+  "level": {
+    "beginner": "Başlangıç",
+    "intermediate": "Orta seviye",
+    "expert": "Uzman"
+  },
+  "mechanic": {
+    "compound": "Bileşik",
+    "isolation": "İzolasyon"
+  },
+  "force": {
+    "push": "İtme",
+    "pull": "Çekme",
+    "static": "Statik",
+    "isometric": "İzometrik",
+    "crush": "Ezme"
+  },
+  "category": {
+    "strength": "Güç",
+    "cardio": "Kardiyo",
+    "powerlifting": "Powerlifting",
+    "olympic weightlifting": "Olimpik Halter",
+    "strongman": "Güçlü Adam",
+    "plyometrics": "Pliometrik",
+    "stretching": "Esneme",
+    "back": "Geri",
+    "chest": "Göğüs",
+    "shoulders": "Omuzlar",
+    "neck": "Boyun",
+    "waist": "Bel",
+    "upper arms": "Üst kollar",
+    "lower arms": "Alt kollar",
+    "upper legs": "Üst bacaklar",
+    "lower legs": "Alt bacaklar",
+    "mobility": "Mobilite"
+  },
+  "body_part": {
+    "abdominals": "Karın Kasları",
+    "abductors": "Abduktörler",
+    "calves": "Baldırlar",
+    "chest": "Göğüs",
+    "forearms": "Önkollar",
+    "glutes": "Kalça Kasları",
+    "hamstrings": "Arka Bacak",
+    "lower back": "Alt Sırt",
+    "middle back": "Orta Sırt",
+    "neck": "Boyun",
+    "shoulders": "Omuzlar",
+    "back": "Geri",
+    "cardio": "Kardiyo",
+    "general": "Genel",
+    "hips": "Kalça",
+    "waist": "Bel",
+    "quads": "Ön Bacak",
+    "upper back": "Üst sırt",
+    "thighs": "Uyluklar",
+    "upper arms": "Üst kollar",
+    "lower arms": "Alt kollar",
+    "upper legs": "Üst bacaklar",
+    "lower legs": "Alt bacaklar"
+  },
+  "modality": {
+    "weight_reps": "Ağırlık ve Tekrar",
+    "reps_only": "Tekrar",
+    "bodyweight_reps": "Vücut ağırlığı (+/− ağırlık)",
+    "weight_duration": "Ağırlık ve Süre (yüklü tutuş)",
+    "weight_distance": "Ağırlık ve Mesafe (taşıma)",
+    "duration": "Süre",
+    "duration_distance": "Süre ve Mesafe"
+  },
+  "laterality": {
+    "bilateral": "Çift taraflı",
+    "unilateral_left": "Tek taraflı (sol)",
+    "unilateral_right": "Tek taraflı (sağ)",
+    "alternating": "Dönüşümlü"
+  },
+  "movement_plane": {
+    "sagittal": "Sagital",
+    "frontal": "Frontal",
+    "transverse": "Transvers",
+    "multiplanar": "Çok düzlemli"
+  }
+}

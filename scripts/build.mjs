@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ID_PATTERN } from './lib/catalog.mjs';
 import { discoverMedia } from './lib/media-discovery.mjs';
+import { parseYouTube } from './lib/youtube.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,8 +93,9 @@ for (const folder of exerciseFolders) {
     }
   }
 
-  // Auto-discover media by convention with optional overrides from exercise.json
-  const discoveredMedia = discoverMedia(folder, path.join(exercisesDir, folder), exercise.media);
+  // Auto-discover media by file name. A YouTube link is published with its id, start and end read out of it.
+  const youtube = exercise.media?.youtube_url ? parseYouTube(exercise.media.youtube_url) : null;
+  const discoveredMedia = discoverMedia(folder, path.join(exercisesDir, folder));
 
   // Generate continuous instructions from steps for DB backward-compatibility
   // The schema path and the upstream source ids stay in exercise.json but are not published in dist.
@@ -102,7 +104,9 @@ for (const folder of exerciseFolders) {
     ...publishedFields,
     instructions: exercise.steps.join(' '),
     folder: folder,
-    media: discoveredMedia,
+    media: { ...discoveredMedia, ...(youtube ? { youtube_url: exercise.media.youtube_url, youtube } : {}),
+      ...(exercise.sources?.media?.length ? { credits: exercise.sources.media } : {}),
+    },
   };
 
   allExercises.push(compiledExercise);

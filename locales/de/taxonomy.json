@@ -1,0 +1,88 @@
+{
+  "muscle": {
+    "abdominals": "Bauchmuskeln",
+    "abductors": "Abduktoren",
+    "adductors": "Adduktoren",
+    "biceps": "Bizeps",
+    "calves": "Waden",
+    "chest": "Brust",
+    "forearms": "Unterarme",
+    "glutes": "Gesäß",
+    "hamstrings": "Beinbeuger",
+    "lats": "Latissimus",
+    "lower back": "Unterer Rücken",
+    "middle back": "Mittlerer Rücken",
+    "neck": "Nacken",
+    "quadriceps": "Quadrizeps",
+    "shoulders": "Schultern",
+    "traps": "Trapezmuskel",
+    "triceps": "Trizeps"
+  },
+  "equipment": {
+    "barbell": "Langhantel",
+    "dumbbell": "Kurzhantel",
+    "cable": "Kabelzug",
+    "machine": "Maschine",
+    "bands": "Bänder",
+    "body only": "Nur Körpergewicht",
+    "medicine ball": "Medizinball",
+    "exercise ball": "Gymnastikball",
+    "foam roll": "Faszienrolle",
+    "e-z curl bar": "SZ-Stange",
+    "other": "Sonstiges"
+  },
+  "level": {
+    "beginner": "Anfänger",
+    "intermediate": "Fortgeschritten",
+    "expert": "Profi"
+  },
+  "mechanic": {
+    "compound": "Grundübung",
+    "isolation": "Isolationsübung"
+  },
+  "force": {
+    "push": "Drücken",
+    "pull": "Ziehen",
+    "static": "Statisch"
+  },
+  "category": {
+    "strength": "Kraft",
+    "powerlifting": "Kraftdreikampf",
+    "olympic weightlifting": "Olympisches Gewichtheben",
+    "plyometrics": "Plyometrisches Training",
+    "stretching": "Dehnen",
+    "back": "Zurück",
+    "chest": "Brust",
+    "shoulders": "Schultern",
+    "neck": "Nacken",
+    "waist": "Taille"
+  },
+  "body_part": {
+    "abdominals": "Bauchmuskeln",
+    "abductors": "Abduktoren",
+    "calves": "Waden",
+    "chest": "Brust",
+    "forearms": "Unterarme",
+    "glutes": "Gesäß",
+    "hamstrings": "Beinbeuger",
+    "lower back": "Unterer Rücken",
+    "middle back": "Mittlerer Rücken",
+    "neck": "Nacken",
+    "shoulders": "Schultern",
+    "back": "Zurück",
+    "general": "Allgemein",
+    "hips": "Hüfte",
+    "waist": "Taille",
+    "quads": "Quadrizeps",
+    "upper back": "Oberer Rücken"
+  },
+  "modality": {
+    "weight_reps": "Gewicht und Wiederholungen",
+    "reps_only": "Wiederholungen",
+    "bodyweight_reps": "Körpergewicht (+/− Gewicht)",
+    "weight_duration": "Gewicht & Dauer (Halten mit Gewicht)",
+    "weight_distance": "Gewicht & Entfernung (trägt)",
+    "duration": "Dauer",
+    "duration_distance": "Dauer und Distanz"
+  }
+}

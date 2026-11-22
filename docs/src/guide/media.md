@@ -13,8 +13,12 @@ For example `sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout
 
 Videos live in the exercise folder and are committed like any other file. Add the version you have: `m` and `f` files are separate sets, and the male set is the default shown.
 
-Videos are H.264 MP4 without audio, 5–15 seconds, 1–2 clean repetitions that start and end in the same position so they loop, and at most 2.5 MB. `pnpm validate` checks the codec, size and duration when `ffprobe` is installed.
+Videos are H.264 MP4 without audio, 5–15 seconds, 1–2 clean repetitions that start and end in the same position so they loop, and at most 2.5 MB. `pnpm validate` rejects videos over 2.5 MB, and when `ffprobe` is installed it checks the codec and warns about clips outside 5–15 seconds.
 
 `pnpm media` compresses oversized videos, strips audio and generates any missing previews. You do not have to run it for a pull request: after the merge, a workflow runs it for the folders you touched and commits the previews and thumbnail. It also writes the exercise ID, name, model and license into each MP4's metadata, so a video can still be identified if it is renamed. Set `media.thumbnail_timestamp` in `exercise.json` to choose the thumbnail frame, in seconds.
+
+## YouTube link
+
+An exercise can also link one YouTube video with `"media": { "youtube_url": "https://youtu.be/<id>?t=62&end=121" }`. The address carries the clip: `t` is the start and `end` the stop, in seconds. The browse site plays it in a YouTube tab, and apps read the same link. The [generator](../contribute) builds it from a pasted address.
 
 Generated demonstrations follow the [AI video prompts](./prompts/image-to-video): the SparkyFitness character in the SparkyFitness gym, with primary muscles highlighted red or orange, secondary yellow and stabilizers blue.

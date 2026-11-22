@@ -1,0 +1,89 @@
+{
+  "muscle": {
+    "abdominals": "Мышцы пресса",
+    "abductors": "Отводящие мышцы",
+    "adductors": "Приводящие мышцы",
+    "biceps": "Бицепс",
+    "calves": "Икры",
+    "chest": "Грудь",
+    "forearms": "Предплечья",
+    "glutes": "Ягодицы",
+    "hamstrings": "Задняя поверхность бедра",
+    "lats": "Широчайшие мышцы спины",
+    "lower back": "Поясница",
+    "middle back": "Средняя часть спины",
+    "neck": "Шея",
+    "quadriceps": "Квадрицепсы",
+    "shoulders": "Плечи",
+    "traps": "Трапециевидные мышцы",
+    "triceps": "Трицепс"
+  },
+  "equipment": {
+    "barbell": "Штанга",
+    "dumbbell": "Гантель",
+    "kettlebells": "Гири",
+    "cable": "Блочный тренажёр",
+    "machine": "Тренажёр",
+    "bands": "Эспандеры",
+    "body only": "Собственный вес",
+    "medicine ball": "Медбол",
+    "exercise ball": "Фитбол",
+    "foam roll": "Массажный ролик",
+    "e-z curl bar": "EZ-гриф",
+    "other": "Другое"
+  },
+  "level": {
+    "beginner": "Начинающий",
+    "intermediate": "Промежуточный",
+    "expert": "Эксперт"
+  },
+  "mechanic": {
+    "compound": "Базовые",
+    "isolation": "Изоляция"
+  },
+  "force": {
+    "push": "Толкать",
+    "pull": "Тяга",
+    "static": "Статика"
+  },
+  "category": {
+    "strength": "Сила",
+    "cardio": "Кардио",
+    "powerlifting": "Пауэрлифтинг",
+    "olympic weightlifting": "Олимпийская тяжелая атлетика",
+    "stretching": "Растяжка",
+    "back": "Назад",
+    "chest": "Грудь",
+    "shoulders": "Плечи",
+    "neck": "Шея",
+    "waist": "Обхват талии"
+  },
+  "body_part": {
+    "abdominals": "Мышцы пресса",
+    "abductors": "Отводящие мышцы",
+    "calves": "Икры",
+    "chest": "Грудь",
+    "forearms": "Предплечья",
+    "glutes": "Ягодицы",
+    "hamstrings": "Задняя поверхность бедра",
+    "lower back": "Поясница",
+    "middle back": "Средняя часть спины",
+    "neck": "Шея",
+    "shoulders": "Плечи",
+    "back": "Назад",
+    "cardio": "Кардио",
+    "general": "Общее",
+    "hips": "Бёдра",
+    "waist": "Обхват талии",
+    "quads": "Квадрицепсы"
+  },
+  "modality": {
+    "weight_reps": "Вес и повторения",
+    "reps_only": "Повторения",
+    "bodyweight_reps": "Собственный вес (+/− отягощение)",
+    "weight_duration": "Вес и длительность (удержание отягощения)",
+    "weight_distance": "Вес и расстояние (переноска тяжестей)",
+    "duration": "Продолжительность",
+    "duration_distance": "Продолжительность и расстояние"
+  }
+}

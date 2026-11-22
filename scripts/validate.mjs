@@ -40,6 +40,24 @@ const exerciseFolders = fs
 
 let errorCount = 0;
 let warningCount = 0;
+// Labels for the taxonomy values (muscles, equipment, levels, ...) in every language
+const labelsDir = path.join(rootDir, 'locales');
+const taxonomyEn = JSON.parse(fs.readFileSync(path.join(labelsDir, 'en', 'taxonomy.json'), 'utf8'));
+for (const lang of fs.readdirSync(labelsDir)) {
+  const file = path.join(labelsDir, lang, 'taxonomy.json');
+  // Languages with translated exercises (exercises.json) need every label; the others fall back to English
+  const complete = fs.existsSync(path.join(labelsDir, lang, 'exercises.json'));
+  if (lang === 'en' || !fs.existsSync(file)) continue;
+  const labels = JSON.parse(fs.readFileSync(file, 'utf8'));
+  for (const [section, terms] of Object.entries(taxonomyEn)) {
+    for (const term of Object.keys(terms)) {
+      if (complete && !labels[section]?.[term]) {
+        console.error(`❌ locales/${lang}/taxonomy.json is missing ${section}.${term}`);
+        errorCount++;
+      }
+    }
+  }
+}
 const seenIds = new Set();
 const checkContext = { idPattern: ID_PATTERN, validMuscles, validEquipment, validModalities };
 
@@ -71,6 +89,29 @@ for (const folder of exerciseFolders) {
     errorCount++;
   }
 
+  // 1a. Every taxonomy value needs a label in locales/en/taxonomy.json (the other languages are checked above)
+  const t = exercise.taxonomy ?? {};
+  const used = {
+    category: [t.category],
+    body_part: [t.body_part],
+    equipment: [t.equipment],
+    modality: [t.modality],
+    level: [t.level],
+    mechanic: [t.mechanic],
+    force: [t.force],
+    muscle: [...(t.primary_muscles ?? []), ...(t.secondary_muscles ?? [])],
+    laterality: [exercise.biomechanics?.laterality],
+    movement_plane: [exercise.biomechanics?.movement_plane],
+  };
+  for (const [section, values] of Object.entries(used)) {
+    for (const value of values.filter(Boolean)) {
+      if (!taxonomyEn[section]?.[value]) {
+        console.error(`❌ [${folder}] '${value}' (${section}) has no label in locales/en/taxonomy.json. Add it there and in every other language.`);
+        errorCount++;
+      }
+    }
+  }
+
   // 1b. Checks that need the folder or the other exercises
   if (exercise.id) {
     if (seenIds.has(exercise.id)) {
@@ -84,31 +125,27 @@ for (const folder of exerciseFolders) {
     }
   }
 
-  // 4. Validate explicit media overrides (committed image/animation/thumbnail files must exist if declared and stay inside exercise dir)
-  const explicitMediaFiles = [
-    exercise.media?.thumbnail_path,
-    exercise.media?.animation_path,
-    exercise.media?.animation_vertical_path,
-    exercise.media?.animation_horizontal_path,
-    exercise.media?.image_path,
-  ].filter(Boolean);
-
-  for (const mediaFile of explicitMediaFiles) {
-    if (typeof mediaFile !== 'string' || mediaFile.includes('..') || path.isAbsolute(mediaFile)) {
-      console.error(`❌ [${folder}] Invalid media file path (must be a relative filename without '..'): '${mediaFile}'`);
-      errorCount++;
-      continue;
+  // 4a. Credits for media from elsewhere (sources.media): the files must exist and the credit must be complete
+  for (const [i, credit] of (exercise.sources?.media ?? []).entries()) {
+    for (const key of ['author', 'url', 'license']) {
+      if (typeof credit[key] !== 'string' || !credit[key].trim()) {
+        console.error(`❌ [${folder}] sources.media[${i}] needs '${key}'`);
+        errorCount++;
+      }
     }
-    const localPath = path.resolve(exercisePath, mediaFile);
-    const rel = path.relative(exercisePath, localPath);
-    if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      console.error(`❌ [${folder}] Media file path escapes exercise directory: '${mediaFile}'`);
+    if (typeof credit.url === 'string' && !credit.url.startsWith('https://')) {
+      console.error(`❌ [${folder}] sources.media[${i}].url must be an https:// address`);
       errorCount++;
-      continue;
     }
-    if (!fs.existsSync(localPath)) {
-      console.error(`❌ [${folder}] Explicit media file declared in exercise.json does not exist: '${mediaFile}'`);
+    if (!Array.isArray(credit.files) || credit.files.length === 0) {
+      console.error(`❌ [${folder}] sources.media[${i}].files must list the covered files`);
       errorCount++;
+    }
+    for (const file of credit.files ?? []) {
+      if (!fs.existsSync(path.join(exercisePath, file))) {
+        console.error(`❌ [${folder}] sources.media[${i}] lists '${file}', which is not in the folder`);
+        errorCount++;
+      }
     }
   }
 
@@ -125,31 +162,10 @@ for (const folder of exerciseFolders) {
     }
   }
 
-  // 5. Validate Video Assets (auto-discovered on local disk + explicit media overrides)
+  // 5. Validate video files on disk
   const localFiles = fs.readdirSync(exercisePath);
-  const explicitVideos = [
-    exercise.media?.video_path,
-    exercise.media?.video_vertical_path,
-    exercise.media?.video_horizontal_path,
-  ].filter(Boolean);
-
-  for (const vFile of explicitVideos) {
-    if (typeof vFile !== 'string' || vFile.includes('..') || path.isAbsolute(vFile)) {
-      console.error(`❌ [${folder}] Invalid video file path (must be a relative filename without '..'): '${vFile}'`);
-      errorCount++;
-    } else {
-      const localPath = path.resolve(exercisePath, vFile);
-      const rel = path.relative(exercisePath, localPath);
-      if (rel.startsWith('..') || path.isAbsolute(rel)) {
-        console.error(`❌ [${folder}] Video file path escapes exercise directory: '${vFile}'`);
-        errorCount++;
-      }
-    }
-  }
-
   const videoFiles = new Set([
     ...localFiles.filter((f) => f.endsWith('.mp4') && !f.startsWith('_temp_')),
-    ...explicitVideos,
   ].filter(Boolean));
 
   for (const videoFileName of videoFiles) {

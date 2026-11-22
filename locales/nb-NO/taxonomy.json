@@ -1,0 +1,36 @@
+{
+  "level": {
+    "beginner": "Nybegynner",
+    "intermediate": "Viderekommen",
+    "expert": "Ekspert"
+  },
+  "mechanic": {
+    "compound": "Flerleddsøvelse",
+    "isolation": "Isolasjonsøvelse"
+  },
+  "force": {
+    "push": "Press",
+    "pull": "Trekk",
+    "static": "Statisk"
+  },
+  "category": {
+    "strength": "Styrke",
+    "cardio": "Kondisjon",
+    "stretching": "Tøying",
+    "back": "Tilbake",
+    "waist": "Midje"
+  },
+  "body_part": {
+    "back": "Tilbake",
+    "cardio": "Kondisjon",
+    "general": "Generelt",
+    "hips": "Hofter",
+    "waist": "Midje"
+  },
+  "modality": {
+    "weight_reps": "Vekt og repetisjoner",
+    "reps_only": "Repetisjoner",
+    "duration": "Varighet",
+    "duration_distance": "Varighet og distanse"
+  }
+}

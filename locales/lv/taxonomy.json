@@ -1,0 +1,40 @@
+{
+  "level": {
+    "beginner": "Iesācējs",
+    "intermediate": "Vidējs",
+    "expert": "Eksperts"
+  },
+  "mechanic": {
+    "compound": "Komplekss",
+    "isolation": "Izolācija"
+  },
+  "force": {
+    "push": "Stumt",
+    "pull": "Vilkt",
+    "static": "Statisks"
+  },
+  "category": {
+    "strength": "Spēks",
+    "cardio": "Kardiotreniņš",
+    "powerlifting": "Spēka celšana",
+    "olympic weightlifting": "Olimpiskā svarcelšana",
+    "strongman": "Strongmens",
+    "plyometrics": "Pliometrika",
+    "stretching": "Iestiepšanās",
+    "back": "Atpakaļ",
+    "waist": "Viduklis"
+  },
+  "body_part": {
+    "back": "Atpakaļ",
+    "cardio": "Kardiotreniņš",
+    "general": "Vispārīgi",
+    "hips": "Gurni",
+    "waist": "Viduklis"
+  },
+  "modality": {
+    "weight_reps": "Svars un atkārtojumi",
+    "reps_only": "Atkārtojumi",
+    "duration": "Ilgums",
+    "duration_distance": "Ilgums un attālums"
+  }
+}

@@ -23,39 +23,33 @@ const KEYS = [
 const isImage = (f) => f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png');
 
 /** The media of one model. `files` is every file name in the folder. */
-function discoverModel(folder, files, letter, overrides = {}) {
+function discoverModel(folder, files, letter) {
   const own = files.filter((f) => f.includes(`_${letter}_`) && !f.startsWith('_temp_'));
   const pick = (test) => own.find(test) || null;
   const toRelative = (f) => (f ? path.posix.join('exercises', folder, f) : null);
 
-  const videoVertical = overrides.video_vertical_path || pick((f) => f.endsWith('.mp4') && (f.includes('_9_16') || f.includes('_vertical')));
-  const videoHorizontal = overrides.video_horizontal_path || pick((f) => f.endsWith('.mp4') && (f.includes('_16_9') || f.includes('_horizontal')));
+  const videoVertical = pick((f) => f.endsWith('.mp4') && (f.includes('_9_16') || f.includes('_vertical')));
+  const videoHorizontal = pick((f) => f.endsWith('.mp4') && (f.includes('_16_9') || f.includes('_horizontal')));
 
-  let videoDefault = overrides.video_path || null;
-  if (!videoDefault) {
-    const mp4s = own.filter((f) => f.endsWith('.mp4'));
-    videoDefault = mp4s.length === 1 ? mp4s[0] : videoVertical || videoHorizontal;
-  }
+  const mp4s = own.filter((f) => f.endsWith('.mp4'));
+  const videoDefault = mp4s.length === 1 ? mp4s[0] : videoVertical || videoHorizontal;
 
   // Static card thumbnail: <folder>_<m|f>_thumb.<webp|jpg|png>, or any single still image.
   const thumbnail =
-    overrides.thumbnail_path ||
     pick((f) => f.includes('_thumb.') && isImage(f)) ||
     pick((f) => isImage(f) && !f.includes('_9_16') && !f.includes('_16_9'));
 
   const animVertical =
-    overrides.animation_vertical_path ||
     pick((f) => f.includes('_9_16.webp') || f.includes('_9_16.gif')) ||
     (videoVertical ? pick((f) => f.endsWith('.webp') && !f.includes('_thumb.') && !f.includes('_16_9')) : null);
-  const animHorizontal = overrides.animation_horizontal_path || pick((f) => f.includes('_16_9.webp') || f.includes('_16_9.gif'));
+  const animHorizontal = pick((f) => f.includes('_16_9.webp') || f.includes('_16_9.gif'));
   const animation =
-    overrides.animation_path ||
     animVertical ||
     animHorizontal ||
     pick((f) => f.endsWith('.gif') || (f.endsWith('.webp') && !f.includes('_thumb.')));
 
   // A still image stands in for exercises that have no video.
-  const image = overrides.image_path || (!videoDefault ? thumbnail : null);
+  const image = videoDefault ? null : thumbnail;
 
   return {
     video_path: toRelative(videoDefault),
@@ -74,13 +68,12 @@ const hasMedia = (model) => KEYS.some((k) => model[k]);
 /**
  * @param {string} folder exercise folder name
  * @param {string} exercisePath absolute path of that folder
- * @param {object} [overrides] the optional `media` block of exercise.json
  */
-export function discoverMedia(folder, exercisePath, overrides = {}) {
+export function discoverMedia(folder, exercisePath) {
   // Sorted so the result never depends on the order the file system lists files in.
   const files = fs.readdirSync(exercisePath).sort();
-  const male = discoverModel(folder, files, 'm', overrides);
-  const female = discoverModel(folder, files, 'f', {});
+  const male = discoverModel(folder, files, 'm');
+  const female = discoverModel(folder, files, 'f');
   const primary = hasMedia(male) || !hasMedia(female) ? male : female;
   // `male` and `female` are only present when that model has media, so most exercises stay unchanged.
   return { ...primary, ...(hasMedia(male) ? { male } : {}), ...(hasMedia(female) ? { female } : {}) };

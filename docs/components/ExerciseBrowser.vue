@@ -4,6 +4,7 @@ import { withBase } from 'vitepress';
 import BodyMap from './BodyMap.vue';
 import { MAP_MUSCLES } from './bodyMapData';
 import { equipmentIconSvg } from './equipmentIcons';
+import { parseYouTube, formatTime, youtubeEmbedUrl, youtubeWatchUrl } from '../../scripts/lib/youtube.mjs';
 
 interface Media {
   video_path?: string | null;
@@ -14,6 +15,10 @@ interface Media {
   animation_horizontal_path?: string | null;
   thumbnail_path?: string | null;
   image_path?: string | null;
+  youtube_url?: string;
+  credits?: { files: string[]; author: string; url: string; license: string; credit_text?: string; credit_url?: string }[];
+  male?: Media;
+  female?: Media;
 }
 interface Exercise {
   id: string;
@@ -52,6 +57,20 @@ const LANGS: Record<string, string> = {
   hi: 'हिन्दी',
   zh: '中文',
   ko: '한국어',
+  ar: 'العربية',
+  bg: 'Български',
+  cs: 'Čeština',
+  de: 'Deutsch',
+  hu: 'Magyar',
+  lv: 'Latviešu',
+  'nb-NO': 'Norsk bokmål',
+  nl: 'Nederlands',
+  'pt-BR': 'Português (Brasil)',
+  ru: 'Русский',
+  sk: 'Slovenčina',
+  sv: 'Svenska',
+  'yue-Hant': '粵語',
+  'zh-Hant': '繁體中文',
 };
 const MUSCLES = [
   'abdominals', 'abductors', 'adductors', 'biceps', 'calves', 'chest', 'forearms', 'glutes',
@@ -73,11 +92,15 @@ const all = ref<Exercise[]>([]);
 const loading = ref(true);
 const error = ref('');
 const locale = ref<Record<string, LocaleEntry>>({});
+type Labels = Record<string, Record<string, string>>;
+const labelsEn = ref<Labels>({});
+const labelsLang = ref<Labels>({});
 
 const state = reactive({
   q: '',
   lang: 'en',
-  media: '' as '' | 'video' | 'none',
+  media: '' as '' | 'video' | 'novideo',
+  model: '' as '' | 'male' | 'female',
   equipment: [] as string[],
   muscles: [] as string[],
   role: 'primary' as 'primary' | 'any',
@@ -86,14 +109,22 @@ const state = reactive({
 });
 const limit = ref(PAGE);
 const showFilters = ref(false);
-const openPanel = ref<'muscles' | 'equipment' | null>(null);
+const showMap = ref(false);
+const toolbar = ref<HTMLElement | null>(null);
+const root = ref<HTMLElement | null>(null);
 
 /* ---------- helpers ---------- */
+// A taxonomy value (muscle, equipment, level, ...) in the chosen language, then English, then the raw value.
+const tr = (section: string, value?: string | null) =>
+  value ? labelsLang.value[section]?.[value] ?? labelsEn.value[section]?.[value] ?? value.replace(/_/g, ' ') : '—';
 const media = (p?: string | null) => (p ? withBase('/' + p) : '');
 const label = (v?: string | null) => (v ? v.replace(/_/g, ' ') : '—');
 const tName = (e: Exercise) => locale.value[e.id]?.name || e.name;
 const hasVideo = (e: Exercise) => !!(e.media?.video_path || e.media?.video_vertical_path || e.media?.video_horizontal_path);
-const hasMedia = (e: Exercise) => hasVideo(e) || !!(e.media?.thumbnail_path || e.media?.animation_path || e.media?.image_path);
+const hasVideoOf = (e: Exercise, model: 'male' | 'female') => {
+  const m = e.media?.[model];
+  return !!(m?.video_path || m?.video_vertical_path || m?.video_horizontal_path);
+};
 const icon = (eq: string, size = 20) => equipmentIconSvg(eq, size);
 const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
 
@@ -105,8 +136,11 @@ function matches(e: Exercise, skip?: string): boolean {
     const hay = norm([e.name, tName(e), e.id, ...(e.aliases ?? [])].join(' '));
     if (!q.split(/\s+/).every((w) => hay.includes(w))) return false;
   }
-  if (state.media === 'video' && !hasVideo(e)) return false;
-  if (state.media === 'none' && hasMedia(e)) return false;
+  if (skip !== 'media') {
+    if (state.media === 'video' && !hasVideo(e)) return false;
+    if (state.media === 'novideo' && hasVideo(e)) return false;
+  }
+  if (state.model && !hasVideoOf(e, state.model)) return false;
   if (skip !== 'equipment' && state.equipment.length && !state.equipment.includes(t.equipment)) return false;
   if (skip !== 'muscles' && state.muscles.length) {
     const pool = state.role === 'any' ? [...t.primary_muscles, ...t.secondary_muscles] : t.primary_muscles;
@@ -153,6 +187,8 @@ const muscleCounts = computed(() =>
     state.role === 'any' ? [...e.taxonomy.primary_muscles, ...e.taxonomy.secondary_muscles] : e.taxonomy.primary_muscles
   )
 );
+const mediaCounts = computed(() => countsFor('media', (e) => (hasVideo(e) ? 'video' : 'novideo')));
+const sideCount = computed(() => state.muscles.length + state.equipment.length);
 const availableMuscles = computed(() => MUSCLES.filter((m) => (muscleCounts.value.get(m) ?? 0) > 0));
 const undrawnMuscles = MUSCLES.filter((m) => !MAP_MUSCLES.has(m));
 const activeCount = computed(
@@ -160,6 +196,7 @@ const activeCount = computed(
     state.equipment.length +
     state.muscles.length +
     (state.media ? 1 : 0) +
+    (state.model ? 1 : 0) +
     Object.values(state.selects).filter(Boolean).length
 );
 
@@ -168,22 +205,10 @@ function toggle(list: string[], v: string) {
   if (i >= 0) list.splice(i, 1);
   else list.push(v);
 }
-function togglePanel(panel: 'muscles' | 'equipment') {
-  openPanel.value = openPanel.value === panel ? null : panel;
-}
-// Close the open panel on an outside click or Escape. composedPath() is read at dispatch time, so it
-// still works when Vue has already re-rendered the clicked element away.
-function onDocClick(e: MouseEvent) {
-  if (!openPanel.value) return;
-  const inside = e.composedPath().some((el) => (el as Element).classList?.contains('pop'));
-  if (!inside) openPanel.value = null;
-}
-function onKey(e: KeyboardEvent) {
-  if (e.key === 'Escape') openPanel.value = null;
-}
 function reset() {
   state.q = '';
   state.media = '';
+  state.model = '';
   state.equipment.splice(0);
   state.muscles.splice(0);
   for (const s of SELECTS) state.selects[s.key] = '';
@@ -192,7 +217,7 @@ function reset() {
 /* ---------- detail ---------- */
 const dialog = ref<HTMLDialogElement | null>(null);
 const current = ref<Exercise | null>(null);
-const view = reactive({ kind: 'video' as 'video' | 'animation' | 'image', orient: 'vertical' as 'vertical' | 'horizontal' });
+const view = reactive({ kind: 'video' as 'video' | 'animation' | 'image' | 'youtube', orient: 'vertical' as 'vertical' | 'horizontal' });
 
 const sources = computed(() => {
   const m = current.value?.media ?? {};
@@ -208,13 +233,21 @@ const sources = computed(() => {
     image: { vertical: m.image_path || m.thumbnail_path || '', horizontal: '' },
   };
 });
-const kinds = computed(() =>
-  (['video', 'animation', 'image'] as const).filter((k) => sources.value[k].vertical || sources.value[k].horizontal)
-);
+const yt = computed(() => (current.value?.media?.youtube_url ? parseYouTube(current.value.media.youtube_url) : null));
+const credit = computed(() => current.value?.media?.credits?.[0] ?? null);
+const ytClip = computed(() => {
+  const y = yt.value;
+  if (!y || (y.start == null && y.end == null)) return '';
+  return `from ${formatTime(y.start ?? 0)}${y.end != null ? ` to ${formatTime(y.end)}` : ''}`;
+});
+const kinds = computed(() => {
+  const own = (['video', 'animation', 'image'] as const).filter((k) => sources.value[k].vertical || sources.value[k].horizontal);
+  return yt.value ? [...own, 'youtube' as const] : own;
+});
 const orients = computed(() =>
-  (['vertical', 'horizontal'] as const).filter((o) => sources.value[view.kind]?.[o])
+  view.kind === 'youtube' ? [] : (['vertical', 'horizontal'] as const).filter((o) => sources.value[view.kind]?.[o])
 );
-const src = computed(() => media(sources.value[view.kind]?.[view.orient] || ''));
+const src = computed(() => (view.kind === 'youtube' ? '' : media(sources.value[view.kind]?.[view.orient] || '')));
 const tSteps = computed(() => (current.value && locale.value[current.value.id]?.steps) || current.value?.steps || []);
 const tCues = computed(
   () => (current.value && locale.value[current.value.id]?.coaching_cues) || current.value?.coaching_cues || []
@@ -239,7 +272,20 @@ watch(
 );
 
 /* ---------- language ---------- */
+async function loadLabels(lang: string) {
+  const get = async (code: string): Promise<Labels> => {
+    try {
+      const res = await fetch(withBase(`/locales/${code}/taxonomy.json`));
+      return res.ok ? await res.json() : {};
+    } catch {
+      return {};
+    }
+  };
+  if (!Object.keys(labelsEn.value).length) labelsEn.value = await get('en');
+  labelsLang.value = lang === 'en' ? {} : await get(lang);
+}
 async function loadLocale(lang: string) {
+  await loadLabels(lang);
   if (lang === 'en') {
     locale.value = {};
     return;
@@ -258,6 +304,7 @@ function syncUrl() {
   if (state.q) p.set('q', state.q);
   if (state.lang !== 'en') p.set('lang', state.lang);
   if (state.media) p.set('media', state.media);
+  if (state.model) p.set('model', state.model);
   if (state.equipment.length) p.set('equipment', state.equipment.join(','));
   if (state.muscles.length) p.set('muscles', state.muscles.join(','));
   if (state.role !== 'primary') p.set('role', state.role);
@@ -272,7 +319,8 @@ function readUrl() {
   state.q = p.get('q') ?? '';
   state.lang = LANGS[p.get('lang') ?? ''] ? p.get('lang')! : 'en';
   const m = p.get('media');
-  state.media = m === 'video' || m === 'none' ? m : '';
+  state.media = m === 'video' ? 'video' : m === 'novideo' || m === 'none' ? 'novideo' : '';
+  state.model = p.get('model') === 'male' ? 'male' : p.get('model') === 'female' ? 'female' : '';
   state.equipment = (p.get('equipment') ?? '').split(',').filter(Boolean);
   state.muscles = (p.get('muscles') ?? '').split(',').filter(Boolean);
   state.role = p.get('role') === 'any' ? 'any' : 'primary';
@@ -281,7 +329,7 @@ function readUrl() {
   return p.get('ex');
 }
 watch(
-  () => [state.q, state.lang, state.media, state.equipment, state.muscles, state.role, state.figure, state.selects],
+  () => [state.q, state.lang, state.media, state.model, state.equipment, state.muscles, state.role, state.figure, state.selects],
   () => {
     limit.value = PAGE;
     syncUrl();
@@ -293,9 +341,15 @@ watch(
 const sentinel = ref<HTMLElement | null>(null);
 let io: IntersectionObserver | null = null;
 
+let ro: ResizeObserver | null = null;
 onMounted(async () => {
-  document.addEventListener('click', onDocClick);
-  document.addEventListener('keydown', onKey);
+  showMap.value = window.matchMedia('(min-width: 861px)').matches;
+  if (toolbar.value && root.value && typeof ResizeObserver !== 'undefined') {
+    const apply = () => root.value?.style.setProperty('--tb-h', `${toolbar.value?.offsetHeight ?? 110}px`);
+    ro = new ResizeObserver(apply);
+    ro.observe(toolbar.value);
+    apply();
+  }
   const ex = readUrl();
   try {
     const res = await fetch(withBase('/data/exercises.json'));
@@ -319,95 +373,26 @@ onMounted(async () => {
 });
 onBeforeUnmount(() => {
   io?.disconnect();
-  document.removeEventListener('click', onDocClick);
-  document.removeEventListener('keydown', onKey);
+  ro?.disconnect();
 });
 </script>
 
 <template>
-  <div class="xb">
-    <div class="xb-toolbar">
-      <div class="tb-row main">
-        <div class="search">
-          <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
+  <div ref="root" class="xb">
+    <div class="xb-layout" :class="{ 'map-open': showMap }">
+      <aside v-show="showMap" class="xb-side" aria-label="Muscles, equipment and language">
+        <div class="side-head">
+          <h2>Filters</h2>
+          <button type="button" class="link" @click="showMap = false">Hide ◀</button>
         </div>
-        <div class="pop">
-          <button
-            type="button"
-            class="pop-btn"
-            :class="{ on: state.muscles.length || openPanel === 'muscles' }"
-            :aria-expanded="openPanel === 'muscles'"
-            @click="togglePanel('muscles')"
-          >
-            Muscles <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span
-            ><span class="caret" aria-hidden="true">▾</span>
-          </button>
-          <div v-if="openPanel === 'muscles'" class="panel panel-muscles">
-            <div class="panel-head">
-              <div class="seg small" role="group" aria-label="Figure">
-                <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
-                <button type="button" :aria-pressed="state.figure === 'female'" @click="state.figure = 'female'">Female</button>
-              </div>
-              <div class="seg small" role="group" aria-label="Muscle role">
-                <button type="button" :aria-pressed="state.role === 'primary'" @click="state.role = 'primary'">Primary only</button>
-                <button type="button" :aria-pressed="state.role === 'any'" @click="state.role = 'any'">Primary + secondary</button>
-              </div>
-            </div>
-            <BodyMap
-              :figure="state.figure"
-              mode="filter"
-              :selected="state.muscles"
-              :available="availableMuscles"
-              @toggle="(m) => toggle(state.muscles, m)"
-            />
-            <details class="list-pick">
-              <summary>Choose from a list instead</summary>
-              <div class="list-grid">
-                <label v-for="m in MUSCLES" :key="m" class="list-row">
-                  <span class="check">
-                    <input
-                      type="checkbox"
-                      :checked="state.muscles.includes(m)"
-                      :disabled="!muscleCounts.get(m) && !state.muscles.includes(m)"
-                      @change="toggle(state.muscles, m)"
-                    />
-                    <span class="name">{{ m }}</span>
-                  </span>
-                  <span class="muted">{{ muscleCounts.get(m) ?? 0 }}</span>
-                </label>
-              </div>
-            </details>
-            <template v-if="undrawnMuscles.length">
-            <p class="muted small chips-label">Not drawn on the body map:</p>
-            <div class="chips">
-              <button
-                v-for="m in undrawnMuscles"
-                :key="m"
-                type="button"
-                class="chip-btn"
-                :aria-pressed="state.muscles.includes(m)"
-                :disabled="!muscleCounts.get(m)"
-                @click="toggle(state.muscles, m)"
-              >
-                {{ m }}
-              </button>
-            </div>
-            </template>
-          </div>
-        </div>
-
-        <div class="pop">
-          <button
-            type="button"
-            class="pop-btn"
-            :class="{ on: state.equipment.length || openPanel === 'equipment' }"
-            :aria-expanded="openPanel === 'equipment'"
-            @click="togglePanel('equipment')"
-          >
-            Equipment <span v-if="state.equipment.length" class="pill">{{ state.equipment.length }}</span
-            ><span class="caret" aria-hidden="true">▾</span>
-          </button>
-          <div v-if="openPanel === 'equipment'" class="panel panel-equipment">
+        <details class="side-sec" open>
+          <summary>Language</summary>
+          <select v-model="state.lang" aria-label="Language" class="lang">
+            <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
+          </select>
+        </details>
+        <details class="side-sec" open>
+          <summary>Equipment <span v-if="state.equipment.length" class="pill">{{ state.equipment.length }}</span></summary>
             <div class="equip">
               <button
                 v-for="o in equipmentOptions"
@@ -416,59 +401,137 @@ onBeforeUnmount(() => {
                 class="equip-tile"
                 :aria-pressed="state.equipment.includes(o.value)"
                 :disabled="!o.count && !state.equipment.includes(o.value)"
-                :title="`${o.value} (${o.count})`"
+                :title="`${tr('equipment', o.value)} (${o.count})`"
                 @click="toggle(state.equipment, o.value)"
               >
                 <span class="equip-icon" v-html="icon(o.value, 26)" />
-                <span class="equip-name">{{ o.value }}</span>
+                <span class="equip-name">{{ tr('equipment', o.value) }}</span>
                 <span class="equip-count">{{ o.count }}</span>
               </button>
             </div>
+        </details>
+        <details class="side-sec" open>
+          <summary>Muscles <span v-if="state.muscles.length" class="pill">{{ state.muscles.length }}</span></summary>
+<div class="panel-head">
+          <div class="seg small" role="group" aria-label="Figure">
+            <button type="button" :aria-pressed="state.figure === 'male'" @click="state.figure = 'male'">Male</button>
+            <button type="button" :aria-pressed="state.figure === 'female'" @click="state.figure = 'female'">Female</button>
+          </div>
+          <div class="seg small" role="group" aria-label="Muscle role">
+            <button type="button" :aria-pressed="state.role === 'primary'" @click="state.role = 'primary'">Primary only</button>
+            <button type="button" :aria-pressed="state.role === 'any'" @click="state.role = 'any'">Primary + secondary</button>
           </div>
         </div>
+        <BodyMap
+          :figure="state.figure"
+          mode="filter"
+          :selected="state.muscles"
+          :available="availableMuscles"
+          @toggle="(m) => toggle(state.muscles, m)"
+        />
+        <details class="list-pick">
+          <summary>Choose from a list instead</summary>
+          <div class="list-grid">
+            <label v-for="m in MUSCLES" :key="m" class="list-row">
+              <span class="check">
+                <input
+                  type="checkbox"
+                  :checked="state.muscles.includes(m)"
+                  :disabled="!muscleCounts.get(m) && !state.muscles.includes(m)"
+                  @change="toggle(state.muscles, m)"
+                />
+                <span class="name">{{ tr('muscle', m) }}</span>
+              </span>
+              <span class="muted">{{ muscleCounts.get(m) ?? 0 }}</span>
+            </label>
+          </div>
+        </details>
+        <template v-if="undrawnMuscles.length">
+        <p class="muted small chips-label">Not drawn on the body map:</p>
+        <div class="chips">
+          <button
+            v-for="m in undrawnMuscles"
+            :key="m"
+            type="button"
+            class="chip-btn"
+            :aria-pressed="state.muscles.includes(m)"
+            :disabled="!muscleCounts.get(m)"
+            @click="toggle(state.muscles, m)"
+          >
+            {{ tr('muscle', m) }}
+          </button>
+        </div>
+        </template>
+        </details>
+      </aside>
 
-        <select v-model="state.lang" aria-label="Language" class="lang">
-          <option v-for="(name, code) in LANGS" :key="code" :value="code">{{ name }}</option>
-        </select>
-        <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
-          Filters<span v-if="activeCount"> ({{ activeCount }})</span>
-        </button>
-      </div>
-
-      <div class="tb-row filters" :class="{ open: showFilters }" role="group" aria-label="Filters">
-        <label v-for="s in SELECTS" :key="s.key" class="sel" :class="{ on: state.selects[s.key] }">
-          <select v-model="state.selects[s.key]" :aria-label="s.label">
-            <option value="">{{ s.label }}</option>
-            <option v-for="o in selectOptions[s.key]" :key="o.value" :value="o.value" :disabled="!o.count">
-              {{ label(o.value) }} ({{ o.count }})
-            </option>
-          </select>
-        </label>
-
-        <div class="seg small" role="group" aria-label="Media">
-          <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
-          <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">With video</button>
-          <button type="button" :aria-pressed="state.media === 'none'" @click="state.media = 'none'">No media</button>
+      <div class="xb-main">
+      <div ref="toolbar" class="xb-toolbar">
+        <div class="tb-row main">
+          <button
+            type="button"
+            class="pop-btn"
+            :class="{ on: sideCount || showMap }"
+            :aria-expanded="showMap"
+            @click="showMap = !showMap"
+          >
+            Muscles &amp; equipment <span v-if="sideCount" class="pill">{{ sideCount }}</span
+            ><span class="caret" aria-hidden="true">{{ showMap ? '◀' : '▶' }}</span>
+          </button>
+          <div class="search">
+            <input v-model="state.q" type="search" placeholder="Search 1,900+ exercises by name, alias or ID" aria-label="Search exercises" />
+          </div>
+          <button type="button" class="btn only-mobile" :aria-expanded="showFilters" @click="showFilters = !showFilters">
+            Filters<span v-if="activeCount"> ({{ activeCount }})</span>
+          </button>
         </div>
 
-        <button v-if="activeCount" type="button" class="link reset" @click="reset">Reset ({{ activeCount }})</button>
-      </div>
+        <div class="tb-row filters" :class="{ open: showFilters }" role="group" aria-label="Filters">
+          <label v-for="s in SELECTS" :key="s.key" class="sel" :class="{ on: state.selects[s.key] }">
+            <select v-model="state.selects[s.key]" :aria-label="s.label">
+              <option value="">{{ s.label }}</option>
+              <option v-for="o in selectOptions[s.key]" :key="o.value" :value="o.value" :disabled="!o.count">
+                {{ tr(s.key, o.value) }} ({{ o.count }})
+              </option>
+            </select>
+          </label>
 
-      <div v-if="state.muscles.length || state.equipment.length" class="tb-row active-row">
-        <button v-for="m in state.muscles" :key="'m' + m" type="button" class="chip-btn on" @click="toggle(state.muscles, m)">
-          {{ m }} ✕
-        </button>
-        <button v-for="e in state.equipment" :key="'e' + e" type="button" class="chip-btn on" @click="toggle(state.equipment, e)">
-          {{ e }} ✕
-        </button>
+          <div class="seg small" role="group" aria-label="Video">
+            <button type="button" :aria-pressed="state.media === ''" @click="state.media = ''">All</button>
+            <button type="button" :aria-pressed="state.media === 'video'" @click="state.media = 'video'">
+              With video <span class="n">{{ mediaCounts.get('video') ?? 0 }}</span>
+            </button>
+            <button type="button" :aria-pressed="state.media === 'novideo'" @click="state.media = 'novideo'">
+              No video <span class="n">{{ mediaCounts.get('novideo') ?? 0 }}</span>
+            </button>
+          </div>
+          <div class="seg small" role="group" aria-label="Model in the video">
+            <button type="button" :aria-pressed="state.model === ''" @click="state.model = ''">Any model</button>
+            <button type="button" :aria-pressed="state.model === 'male'" @click="state.model = 'male'">Male</button>
+            <button type="button" :aria-pressed="state.model === 'female'" @click="state.model = 'female'">Female</button>
+          </div>
+
+          <button v-if="activeCount" type="button" class="link reset" @click="reset">Reset ({{ activeCount }})</button>
+        </div>
+
+        <div v-if="state.muscles.length || state.equipment.length" class="tb-row active-row">
+          <button v-for="m in state.muscles" :key="'m' + m" type="button" class="chip-btn on" @click="toggle(state.muscles, m)">
+            {{ tr('muscle', m) }} ✕
+          </button>
+          <button v-for="e in state.equipment" :key="'e' + e" type="button" class="chip-btn on" @click="toggle(state.equipment, e)">
+            {{ tr('equipment', e) }} ✕
+          </button>
+        </div>
       </div>
-    </div>
 
     <section class="xb-results" aria-live="polite">
       <p v-if="loading" class="muted">Loading exercises…</p>
       <p v-else-if="error" class="muted">{{ error }}</p>
       <template v-else>
         <p class="muted count">{{ filtered.length.toLocaleString() }} of {{ all.length.toLocaleString() }} exercises</p>
+        <p v-if="state.media === 'novideo'" class="muted small hint">
+          These exercises have no video yet. Open one and choose <b>Add a video</b> to send yours as a pull request.
+        </p>
         <ul class="grid">
           <li v-for="e in visible" :key="e.id" class="card">
             <button type="button" @click="open(e)">
@@ -476,15 +539,17 @@ onBeforeUnmount(() => {
                 <img v-if="e.media?.thumbnail_path" :src="media(e.media.thumbnail_path)" :alt="tName(e)" loading="lazy" />
                 <div v-else class="ph">
                   <span class="ph-icon" v-html="icon(e.taxonomy.equipment, 40)" />
-                  <span>{{ e.taxonomy.primary_muscles.join(', ') }}</span>
+                  <span>{{ e.taxonomy.primary_muscles.map((m) => tr('muscle', m)).join(', ') }}</span>
                 </div>
                 <span v-if="hasVideo(e)" class="badge">▶ Video</span>
+                <span v-else-if="e.media?.youtube_url" class="badge">▶ YouTube</span>
+                <span v-else class="badge none">No video</span>
               </div>
               <div class="card-body">
                 <h3>{{ tName(e) }}</h3>
                 <p class="meta">
                   <span class="mini-icon" v-html="icon(e.taxonomy.equipment, 14)" />
-                  {{ e.taxonomy.equipment }} · {{ e.taxonomy.level }}
+                  {{ tr('equipment', e.taxonomy.equipment) }} · {{ tr('level', e.taxonomy.level) }}
                 </p>
               </div>
             </button>
@@ -494,14 +559,26 @@ onBeforeUnmount(() => {
       </template>
       <div ref="sentinel" class="sentinel" aria-hidden="true" />
     </section>
+      </div>
+    </div>
 
     <dialog ref="dialog" class="xb-dialog" aria-labelledby="xb-title" @close="close" @click.self="dialog?.close()">
       <div v-if="current" class="detail">
         <button type="button" class="close" aria-label="Close" @click="dialog?.close()">✕</button>
         <div class="viewer">
-          <div class="media-box" :class="view.orient">
+          <div class="media-box" :class="[view.orient, { yt: view.kind === 'youtube' }]">
+            <iframe
+              v-if="view.kind === 'youtube' && yt"
+              :key="current.id + 'yt'"
+              :src="youtubeEmbedUrl(yt)"
+              :title="`${tName(current)} on YouTube`"
+              allow="encrypted-media; picture-in-picture; fullscreen"
+              referrerpolicy="strict-origin-when-cross-origin"
+              loading="lazy"
+              allowfullscreen
+            />
             <video
-              v-if="view.kind === 'video' && src"
+              v-else-if="view.kind === 'video' && src"
               :key="src"
               :src="src"
               controls
@@ -514,12 +591,13 @@ onBeforeUnmount(() => {
             <div v-else class="ph big">
               <span class="ph-icon" v-html="icon(current.taxonomy.equipment, 64)" />
               <span>No video yet</span>
+              <a class="add-video" :href="withBase(`/contribute?edit=${current.id}#media`)">＋ Add a video</a>
             </div>
           </div>
           <div v-if="kinds.length" class="controls">
             <div class="seg small" role="group" aria-label="Media type">
               <button v-for="k in kinds" :key="k" type="button" :aria-pressed="view.kind === k" @click="view.kind = k">
-                {{ k === 'video' ? 'Video' : k === 'animation' ? 'Animation' : 'Image' }}
+                {{ k === 'video' ? 'Video' : k === 'animation' ? 'Animation' : k === 'image' ? 'Image' : 'YouTube' }}
               </button>
             </div>
             <div v-if="orients.length > 1" class="seg small" role="group" aria-label="Orientation">
@@ -528,6 +606,16 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </div>
+          <p v-if="view.kind !== 'youtube' && credit" class="muted small yt-credit">
+            <a :href="credit.credit_url || credit.url" target="_blank" rel="noopener noreferrer">{{
+              credit.credit_text || `Video by ${credit.author}`
+            }}</a>
+            · <a :href="credit.url" target="_blank" rel="noopener noreferrer">Source ↗</a>
+          </p>
+          <p v-if="view.kind === 'youtube' && yt" class="muted small yt-credit">
+            Video on YouTube<template v-if="ytClip"> ({{ ytClip }})</template>.
+            <a :href="youtubeWatchUrl(yt)" target="_blank" rel="noopener noreferrer">Open on YouTube ↗</a>
+          </p>
           <div class="detail-map">
             <div class="detail-map-header">
               <span class="detail-map-title">Target muscles</span>
@@ -555,21 +643,21 @@ onBeforeUnmount(() => {
           <p v-if="current.aliases?.length" class="muted">Also: {{ current.aliases.join(', ') }}</p>
 
           <div class="tags">
-            <span class="tag equip-tag"><span v-html="icon(current.taxonomy.equipment, 16)" /> {{ current.taxonomy.equipment }}</span>
-            <span v-for="m in current.taxonomy.primary_muscles" :key="'p' + m" class="tag primary">{{ m }}</span>
-            <span v-for="m in current.taxonomy.secondary_muscles" :key="'s' + m" class="tag secondary">{{ m }}</span>
+            <span class="tag equip-tag"><span v-html="icon(current.taxonomy.equipment, 16)" /> {{ tr('equipment', current.taxonomy.equipment) }}</span>
+            <span v-for="m in current.taxonomy.primary_muscles" :key="'p' + m" class="tag primary">{{ tr('muscle', m) }}</span>
+            <span v-for="m in current.taxonomy.secondary_muscles" :key="'s' + m" class="tag secondary">{{ tr('muscle', m) }}</span>
           </div>
 
           <dl class="attrs">
-            <dt>Category</dt><dd>{{ label(current.taxonomy.category) }}</dd>
-            <dt>Body part</dt><dd>{{ label(current.taxonomy.body_part) }}</dd>
-            <dt>Level</dt><dd>{{ label(current.taxonomy.level) }}</dd>
-            <dt>Mechanic</dt><dd>{{ label(current.taxonomy.mechanic) }}</dd>
-            <dt>Force</dt><dd>{{ label(current.taxonomy.force) }}</dd>
-            <dt>Tracking</dt><dd>{{ label(current.taxonomy.modality) }}</dd>
+            <dt>Category</dt><dd>{{ tr('category', current.taxonomy.category) }}</dd>
+            <dt>Body part</dt><dd>{{ tr('body_part', current.taxonomy.body_part) }}</dd>
+            <dt>Level</dt><dd>{{ tr('level', current.taxonomy.level) }}</dd>
+            <dt>Mechanic</dt><dd>{{ tr('mechanic', current.taxonomy.mechanic) }}</dd>
+            <dt>Force</dt><dd>{{ tr('force', current.taxonomy.force) }}</dd>
+            <dt>Tracking</dt><dd>{{ tr('modality', current.taxonomy.modality) }}</dd>
             <template v-if="current.biomechanics">
-              <dt>Laterality</dt><dd>{{ label(current.biomechanics.laterality) }}</dd>
-              <dt>Plane</dt><dd>{{ label(current.biomechanics.movement_plane) }}</dd>
+              <dt>Laterality</dt><dd>{{ tr('laterality', current.biomechanics.laterality) }}</dd>
+              <dt>Plane</dt><dd>{{ tr('movement_plane', current.biomechanics.movement_plane) }}</dd>
               <dt>Tempo</dt><dd>{{ current.biomechanics.default_tempo || '—' }}</dd>
             </template>
           </dl>
@@ -640,8 +728,8 @@ select:focus {
 /* toolbar: search, filters and active chips stay at the top while the results scroll */
 .xb-toolbar {
   background: var(--vp-c-bg);
-  margin: 0 calc(var(--pad) * -1) 16px;
-  padding: 10px var(--pad) 8px;
+  margin: 0 0 16px;
+  padding: 10px 0 8px;
   border-bottom: 1px solid var(--vp-c-divider);
 }
 @media (min-width: 861px) {
@@ -733,9 +821,6 @@ select:focus {
   border-radius: 12px;
   box-shadow: var(--vp-shadow-3);
   padding: 14px;
-}
-.panel-muscles {
-  width: 400px;
 }
 .panel-equipment {
   width: 420px;
@@ -1014,6 +1099,18 @@ select:focus {
   max-width: 100%;
   max-height: 62vh;
 }
+.media-box.yt {
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+}
+.media-box iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.yt-credit {
+  margin: 8px 0 0;
+}
 .ph.big {
   color: #9aa3b2;
   padding: 48px;
@@ -1225,8 +1322,96 @@ select:focus {
   align-items: center;
   gap: 6px;
 }
-.panel-muscles {
-  max-height: 75vh;
+
+/* muscle map pane beside the results */
+.xb-main {
+  min-width: 0;
+}
+.xb-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.xb-layout.map-open {
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+.xb-side {
+  position: sticky;
+  top: calc(var(--vp-nav-height) + 12px);
+  max-height: calc(100vh - var(--vp-nav-height) - 28px);
   overflow: auto;
+  background: var(--vp-c-bg-soft);
+  border-radius: var(--r);
+  padding: 12px 14px;
+}
+.side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.side-head h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 16px;
+}
+.seg .n {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-left: 3px;
+}
+.hint {
+  margin: 0 0 12px;
+}
+.badge.none {
+  background: var(--vp-c-default-soft);
+  color: var(--vp-c-text-2);
+}
+.add-video {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (max-width: 860px) {
+  .xb-layout.map-open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .xb-side {
+    position: static;
+    max-height: none;
+  }
+}
+.side-sec {
+  border-top: 1px solid var(--vp-c-divider);
+  padding: 8px 0;
+}
+.side-sec > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+.side-sec > summary::-webkit-details-marker {
+  display: none;
+}
+.side-sec > summary::before {
+  content: '▸';
+  font-size: 11px;
+  transition: transform 0.15s;
+}
+.side-sec[open] > summary::before {
+  transform: rotate(90deg);
+}
+.xb-side .equip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.xb-side .lang {
+  width: 100%;
 }
 </style>

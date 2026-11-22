@@ -39,6 +39,20 @@
   ],
   "sources": {
     "hasan_id": "1269",
-    "free_id": null
+    "free_id": null,
+    "media": [
+      {
+        "files": [
+          "sf-chest-cbl-0021_cable_standing_up_straight_crossovers_f_9_16.mp4"
+        ],
+        "author": "Your Move",
+        "url": "https://ymove.app/free-exercise-videos",
+        "license": "Your Move free exercise video terms: free for commercial use with credit, no resale or redistribution as a standalone video library",
+        "license_id": "ymove-free-video",
+        "credit_text": "Exercise video by Your Move (ymove.app)",
+        "credit_url": "https://ymove.app/exercise-api",
+        "retrieved": "2026-11-22"
+      }
+    ]
   }
 }

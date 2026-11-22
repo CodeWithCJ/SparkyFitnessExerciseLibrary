@@ -1,0 +1,63 @@
+{
+  "$schema": "../../schema/exercise.schema.json",
+  "id": "sf-legs-kb-0016",
+  "slug": "kettlebell_romanian_deadlift",
+  "name": "Kettlebell Romanian Deadlift",
+  "aliases": [
+    "Kettlebell RDL",
+    "KB Romanian Deadlift"
+  ],
+  "taxonomy": {
+    "modality": "weight_reps",
+    "category": "upper legs",
+    "body_part": "upper legs",
+    "mechanic": "compound",
+    "force": "pull",
+    "level": "beginner",
+    "equipment": "kettlebells",
+    "primary_muscles": [
+      "hamstrings",
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "lower back",
+      "forearms"
+    ]
+  },
+  "biomechanics": {
+    "laterality": "bilateral",
+    "movement_plane": "sagittal",
+    "default_tempo": "2-0-2-0",
+    "demonstration_reps": 2
+  },
+  "steps": [
+    "Stand with your feet hip-width apart and a kettlebell on the floor between them, or hold it in front of your thighs.",
+    "Hinge at the hips, keep your back flat and take the handle with both hands.",
+    "Stand tall with the kettlebell hanging in front of your thighs, knees slightly bent and shoulders pulled back.",
+    "Push your hips straight back and slide the kettlebell down your legs, keeping it close to your body.",
+    "Lower until you feel a strong stretch in your hamstrings, with your back still flat.",
+    "Drive your hips forward to stand tall again and squeeze your glutes at the top.",
+    "Repeat for the desired number of repetitions."
+  ],
+  "coaching_cues": [
+    "Hinge at the hips; the knees only bend slightly and stay in the same position",
+    "Keep the kettlebell close to your legs the whole way",
+    "Stop lowering when your back would start to round"
+  ],
+  "sources": {
+    "media": [
+      {
+        "files": [
+          "sf-legs-kb-0016_kettlebell_romanian_deadlift_m_9_16.mp4"
+        ],
+        "author": "Your Move",
+        "url": "https://ymove.app/free-exercise-videos",
+        "license": "Your Move free exercise video terms: free for commercial use with credit, no resale or redistribution as a standalone video library",
+        "license_id": "ymove-free-video",
+        "credit_text": "Exercise video by Your Move (ymove.app)",
+        "credit_url": "https://ymove.app/exercise-api",
+        "retrieved": "2026-11-22"
+      }
+    ]
+  }
+}

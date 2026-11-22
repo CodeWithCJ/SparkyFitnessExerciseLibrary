@@ -1,0 +1,60 @@
+{
+  "$schema": "../../schema/exercise.schema.json",
+  "id": "sf-legs-mch-0069",
+  "slug": "glute_kickback_machine",
+  "name": "Glute Kickback Machine",
+  "aliases": [
+    "Machine Glute Kickback",
+    "Standing Glute Kickback Machine"
+  ],
+  "taxonomy": {
+    "modality": "weight_reps",
+    "category": "upper legs",
+    "body_part": "upper legs",
+    "mechanic": "isolation",
+    "force": "push",
+    "level": "beginner",
+    "equipment": "machine",
+    "primary_muscles": [
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "hamstrings"
+    ]
+  },
+  "biomechanics": {
+    "laterality": "alternating",
+    "movement_plane": "sagittal",
+    "default_tempo": "2-0-2-0",
+    "demonstration_reps": 2
+  },
+  "steps": [
+    "Adjust the machine so the pad sits behind one leg, just above the heel or on the back of the thigh, and select a light weight.",
+    "Stand facing the machine, hold the handles and keep your chest up and your core tight.",
+    "Push the working leg back and up by squeezing your glute, keeping your hips square and your back flat.",
+    "Pause at the top without arching your lower back.",
+    "Slowly return to the starting position without letting the weight stack touch down.",
+    "Finish all repetitions, then switch legs."
+  ],
+  "coaching_cues": [
+    "Move from the hip, not the lower back",
+    "Keep your hips facing the machine",
+    "Squeeze the glute at the top of every repetition"
+  ],
+  "sources": {
+    "media": [
+      {
+        "files": [
+          "sf-legs-mch-0069_glute_kickback_machine_f_9_16.mp4"
+        ],
+        "author": "Your Move",
+        "url": "https://ymove.app/free-exercise-videos",
+        "license": "Your Move free exercise video terms: free for commercial use with credit, no resale or redistribution as a standalone video library",
+        "license_id": "ymove-free-video",
+        "credit_text": "Exercise video by Your Move (ymove.app)",
+        "credit_url": "https://ymove.app/exercise-api",
+        "retrieved": "2026-11-22"
+      }
+    ]
+  }
+}

@@ -83,3 +83,15 @@ test('a generated ID for a new exercise comes out valid', () => {
   assert.equal(id, 'sf-core-oth-0003');
   assert.deepEqual(validateExercise({ ...sample(), id }, ctx), []);
 });
+
+test('credits in sources.media are kept, and removed only when the form drops them', async () => {
+  const { applyForm, exerciseToForm } = await import('./exercise-form.mjs');
+  const credit = { files: ['a_m_9_16.mp4'], author: 'Someone', url: 'https://example.com', license: 'Terms' };
+  const base = { id: 'sf-core-oth-0001', name: 'X', taxonomy: {}, steps: ['Do the thing'], sources: { hasan_id: '1', media: [credit] } };
+  const form = exerciseToForm(base);
+  assert.deepEqual(applyForm(base, form).sources, base.sources);
+  form.credits.splice(0);
+  assert.deepEqual(applyForm(base, form).sources, { hasan_id: '1' });
+  const fresh = applyForm({ id: 'sf-core-oth-0002' }, { ...exerciseToForm({ taxonomy: {} }), name: 'New one' });
+  assert.equal('sources' in fresh, false);
+});

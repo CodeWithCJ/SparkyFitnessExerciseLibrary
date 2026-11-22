@@ -1,0 +1,26 @@
+{
+  "category": {
+    "strength": "Erő",
+    "cardio": "Kardió",
+    "powerlifting": "Erőemelés",
+    "olympic weightlifting": "Olimpiai Súlyemelés",
+    "strongman": "Erőember",
+    "plyometrics": "Pliometria",
+    "stretching": "Nyújtás",
+    "back": "Vissza"
+  },
+  "body_part": {
+    "back": "Vissza",
+    "cardio": "Kardió",
+    "general": "Általános"
+  },
+  "modality": {
+    "weight_reps": "Súly & Ismétlés",
+    "reps_only": "Ismétlés",
+    "bodyweight_reps": "Testsúly (+/- súly)",
+    "weight_duration": "Súly & Időtartam (terheléses tartás)",
+    "weight_distance": "Súly & Távolság (cipelés)",
+    "duration": "Időtartam",
+    "duration_distance": "Időtartam & Távolság"
+  }
+}

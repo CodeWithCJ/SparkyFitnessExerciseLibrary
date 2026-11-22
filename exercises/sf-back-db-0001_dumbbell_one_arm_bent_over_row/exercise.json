@@ -44,6 +44,20 @@
   ],
   "sources": {
     "hasan_id": "0292",
-    "free_id": "One-Arm_Dumbbell_Row"
+    "free_id": "One-Arm_Dumbbell_Row",
+    "media": [
+      {
+        "files": [
+          "sf-back-db-0001_dumbbell_one_arm_bent_over_row_m_9_16.mp4"
+        ],
+        "author": "Your Move",
+        "url": "https://ymove.app/free-exercise-videos",
+        "license": "Your Move free exercise video terms: free for commercial use with credit, no resale or redistribution as a standalone video library",
+        "license_id": "ymove-free-video",
+        "credit_text": "Exercise video by Your Move (ymove.app)",
+        "credit_url": "https://ymove.app/exercise-api",
+        "retrieved": "2026-11-22"
+      }
+    ]
   }
 }

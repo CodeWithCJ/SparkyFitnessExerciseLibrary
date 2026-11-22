@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "Brzuch",
+    "abductors": "Odwodziciele",
+    "adductors": "Przywodziciele",
+    "biceps": "Biceps",
+    "calves": "Łydki",
+    "chest": "Klatka piersiowa",
+    "forearms": "Przedramiona",
+    "glutes": "Pośladki",
+    "hamstrings": "Dwugłowe uda",
+    "lats": "Najszerszy grzbietu",
+    "lower back": "Dolna część pleców",
+    "middle back": "Środkowa część pleców",
+    "neck": "Szyja",
+    "quadriceps": "Czworogłowe uda",
+    "shoulders": "Barki",
+    "traps": "Czworoboczne",
+    "triceps": "Triceps"
+  },
+  "equipment": {
+    "barbell": "Sztanga",
+    "dumbbell": "Hantla",
+    "kettlebells": "Kettle",
+    "cable": "Wyciąg",
+    "machine": "Maszyna",
+    "bands": "Gumy oporowe",
+    "body only": "Tylko masa ciała",
+    "medicine ball": "Piłka lekarska",
+    "exercise ball": "Piłka do ćwiczeń",
+    "foam roll": "Rolka piankowa",
+    "e-z curl bar": "Gryf łamany E-Z",
+    "other": "Inne"
+  },
+  "level": {
+    "beginner": "Początkujący",
+    "intermediate": "Średniozaawansowany",
+    "expert": "Ekspert"
+  },
+  "mechanic": {
+    "compound": "Wielostawowe",
+    "isolation": "Izolowane"
+  },
+  "force": {
+    "push": "Wypychanie",
+    "pull": "Przyciąganie",
+    "static": "Statyczne",
+    "isometric": "Izometryczny",
+    "crush": "Zgniatanie"
+  },
+  "category": {
+    "strength": "Siłowe",
+    "cardio": "Kardio",
+    "powerlifting": "Trójbój siłowy",
+    "olympic weightlifting": "Podnoszenie ciężarów",
+    "strongman": "Strongman",
+    "plyometrics": "Plyometria",
+    "stretching": "Rozciąganie",
+    "back": "Wstecz",
+    "chest": "Klatka piersiowa",
+    "shoulders": "Barki",
+    "neck": "Szyja",
+    "waist": "Talia",
+    "upper arms": "Górna część ramion",
+    "lower arms": "Dolna część ramion",
+    "upper legs": "Górna część nóg",
+    "lower legs": "Dolna część nóg",
+    "mobility": "Mobilność"
+  },
+  "body_part": {
+    "abdominals": "Brzuch",
+    "abductors": "Odwodziciele",
+    "calves": "Łydki",
+    "chest": "Klatka piersiowa",
+    "forearms": "Przedramiona",
+    "glutes": "Pośladki",
+    "hamstrings": "Dwugłowe uda",
+    "lower back": "Dolna część pleców",
+    "middle back": "Środkowa część pleców",
+    "neck": "Szyja",
+    "shoulders": "Barki",
+    "back": "Wstecz",
+    "cardio": "Kardio",
+    "general": "Ogólne",
+    "hips": "Biodra",
+    "waist": "Talia",
+    "quads": "Czworogłowe uda",
+    "upper back": "Górna część pleców",
+    "thighs": "Uda",
+    "upper arms": "Górna część ramion",
+    "lower arms": "Dolna część ramion",
+    "upper legs": "Górna część nóg",
+    "lower legs": "Dolna część nóg"
+  },
+  "modality": {
+    "weight_reps": "Ciężar i powtórzenia",
+    "reps_only": "Powtórzenia",
+    "bodyweight_reps": "Masa ciała (+/− obciążenie)",
+    "weight_duration": "Ciężar i czas (trzymanie obciążenia)",
+    "weight_distance": "Ciężar i dystans (przenoszenie)",
+    "duration": "Czas trwania",
+    "duration_distance": "Czas trwania i dystans"
+  },
+  "laterality": {
+    "bilateral": "Obustronne",
+    "unilateral_left": "Jednostronne (lewa)",
+    "unilateral_right": "Jednostronne (prawa)",
+    "alternating": "Naprzemienne"
+  },
+  "movement_plane": {
+    "sagittal": "Strzałkowa",
+    "frontal": "Czołowa",
+    "transverse": "Poprzeczna",
+    "multiplanar": "Wielopłaszczyznowa"
+  }
+}

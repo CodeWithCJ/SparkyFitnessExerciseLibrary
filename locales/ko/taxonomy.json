@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "복근",
+    "abductors": "외전근",
+    "adductors": "내전근",
+    "biceps": "이두근",
+    "calves": "종아리",
+    "chest": "가슴",
+    "forearms": "전완",
+    "glutes": "둔근",
+    "hamstrings": "햄스트링",
+    "lats": "광배근",
+    "lower back": "허리",
+    "middle back": "등 중앙",
+    "neck": "목",
+    "quadriceps": "대퇴사두근",
+    "shoulders": "어깨",
+    "traps": "승모근",
+    "triceps": "삼두근"
+  },
+  "equipment": {
+    "barbell": "바벨",
+    "dumbbell": "덤벨",
+    "kettlebells": "케틀벨",
+    "cable": "케이블",
+    "machine": "머신",
+    "bands": "밴드",
+    "body only": "맨몸",
+    "medicine ball": "메디신 볼",
+    "exercise ball": "짐볼",
+    "foam roll": "폼롤러",
+    "e-z curl bar": "EZ 컬 바",
+    "other": "기타"
+  },
+  "level": {
+    "beginner": "초급자",
+    "intermediate": "중급",
+    "expert": "전문가"
+  },
+  "mechanic": {
+    "compound": "복합",
+    "isolation": "격리"
+  },
+  "force": {
+    "push": "푸시",
+    "pull": "가져오기",
+    "static": "정적",
+    "isometric": "등척성",
+    "crush": "크러시"
+  },
+  "category": {
+    "strength": "근력",
+    "cardio": "유산소",
+    "powerlifting": "파워리프팅",
+    "olympic weightlifting": "올림픽 역도",
+    "strongman": "스트롱맨",
+    "plyometrics": "플라이오메트릭",
+    "stretching": "스트레칭",
+    "back": "뒤로",
+    "chest": "가슴",
+    "shoulders": "어깨",
+    "neck": "목",
+    "waist": "허리",
+    "upper arms": "상완",
+    "lower arms": "전완",
+    "upper legs": "허벅지",
+    "lower legs": "하퇴",
+    "mobility": "가동성"
+  },
+  "body_part": {
+    "abdominals": "복근",
+    "abductors": "외전근",
+    "calves": "종아리",
+    "chest": "가슴",
+    "forearms": "전완",
+    "glutes": "둔근",
+    "hamstrings": "햄스트링",
+    "lower back": "허리",
+    "middle back": "등 중앙",
+    "neck": "목",
+    "shoulders": "어깨",
+    "back": "뒤로",
+    "cardio": "유산소",
+    "general": "일반",
+    "hips": "엉덩이",
+    "waist": "허리",
+    "quads": "대퇴사두근",
+    "upper back": "상부 등",
+    "thighs": "허벅지",
+    "upper arms": "상완",
+    "lower arms": "전완",
+    "upper legs": "허벅지",
+    "lower legs": "하퇴"
+  },
+  "modality": {
+    "weight_reps": "중량 및 횟수",
+    "reps_only": "반복 횟수",
+    "bodyweight_reps": "맨몸 반복",
+    "weight_duration": "무게 및 시간",
+    "weight_distance": "무게 및 거리",
+    "duration": "기간",
+    "duration_distance": "기간 및 거리"
+  },
+  "laterality": {
+    "bilateral": "양측",
+    "unilateral_left": "단측(왼쪽)",
+    "unilateral_right": "단측(오른쪽)",
+    "alternating": "교대"
+  },
+  "movement_plane": {
+    "sagittal": "시상면",
+    "frontal": "관상면",
+    "transverse": "횡단면",
+    "multiplanar": "다면"
+  }
+}

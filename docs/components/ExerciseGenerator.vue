@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import { withBase } from 'vitepress';
 import BodyMap from './BodyMap.vue';
 import ListEditor from './ListEditor.vue';
@@ -25,7 +25,9 @@ import {
   MOVEMENT_PLANES,
   REHAB_JOINTS,
   SCHEMA_REF,
+  youtubeProblems,
 } from '../../scripts/lib/exercise-form.mjs';
+import { parseYouTube, formatTime } from '../../scripts/lib/youtube.mjs';
 
 /**
  * Builds a valid exercise.json: it computes the ID, folder and media file names from the same rules
@@ -114,6 +116,7 @@ const problems = computed(() => {
   if (!form.equipment) list.push('Pick the equipment.');
   if (form.primary.length === 0) list.push('Pick at least one primary muscle.');
   if (!stepsOk) list.push('Write at least one step (5 or more characters).');
+  list.push(...youtubeProblems(form));
   const covered =
     /^(Missing id|id must look like|Invalid equipment|Missing or invalid 'name'|'steps' must be|At least one primary muscle)/;
   for (const p of validateExercise(exercise.value, checkContext)) {
@@ -140,6 +143,13 @@ const warnings = computed(() => {
 });
 const ready = computed(() => problems.value.length === 0 && !!folder.value);
 
+const storedLink = computed(() => exercise.value.media?.youtube_url ?? '');
+const linkClip = computed(() => {
+  const p = storedLink.value ? parseYouTube(storedLink.value) : null;
+  if (!p) return '';
+  if (p.start == null && p.end == null) return 'Plays the whole video.';
+  return `Plays from ${formatTime(p.start ?? 0)}${p.end != null ? ` to ${formatTime(p.end)}` : ' to the end'}.`;
+});
 const mediaM = computed(() => (folder.value ? mediaFileNames(folder.value, 'm') : null));
 const mediaF = computed(() => (folder.value ? mediaFileNames(folder.value, 'f') : null));
 
@@ -154,6 +164,8 @@ const existingMedia = computed(() => {
 });
 const folderUrl = computed(() => (folder.value ? `${REPO}/tree/main/exercises/${folder.value}` : ''));
 const have = (name: string) => existingMedia.value.includes(name);
+const creditOf = (name: string) => form.credits.find((c) => c.files.includes(name));
+const removeCredit = (i: number) => form.credits.splice(i, 1);
 
 const githubUrl = computed(() => {
   if (!folder.value) return '';
@@ -294,6 +306,10 @@ onMounted(async () => {
   }
   base.value = source;
   Object.assign(form, exerciseToForm(source));
+  if (location.hash === '#media') {
+    await nextTick();
+    document.getElementById('media')?.scrollIntoView({ block: 'start' });
+  }
 });
 </script>
 
@@ -475,12 +491,13 @@ onMounted(async () => {
           <ListEditor v-model="form.cues" item-label="Cue" add-label="+ Add cue" :rows="2" />
         </section>
 
-        <section v-if="mediaM && mediaF">
+        <section v-if="mediaM && mediaF" id="media">
           <h2>7. Videos and images <span class="muted small">(optional)</span></h2>
           <p>
             A video is the best demonstration; without one, a still image is fine. Add the files to the exercise folder, next to
             <code>exercise.json</code>, with exactly these names. Add the version you have: the letter in each name says who is shown,
-            <b>m</b> for a male model and <b>f</b> for a female model, and apps use it to show the right one.
+            <b>m</b> for a male model and <b>f</b> for a female model, and apps use it to show the right one. No video of your own?
+            You can link a YouTube video instead, in <a href="#youtube">step 8</a>.
           </p>
           <p class="muted small">
             <template v-if="editing">
@@ -493,6 +510,23 @@ onMounted(async () => {
             </template>
           </p>
 
+          <div v-if="form.credits.length" class="credits">
+            <h3>Credits</h3>
+            <p class="muted small">
+              These files are not our own work. They keep the credit below. If you replace one with your own video, remove its credit, or
+              your video would be shown as someone else's.
+            </p>
+            <div v-for="(c, i) in form.credits" :key="c.files.join()" class="credit">
+              <p>
+                <b><a :href="c.credit_url || c.url" target="_blank" rel="noopener noreferrer">{{ c.credit_text || `Video by ${c.author}` }}</a></b>
+                · <a :href="c.url" target="_blank" rel="noopener noreferrer">source ↗</a>
+              </p>
+              <ul class="by-model"><li v-for="f in c.files" :key="f"><CopyText :text="f" what="file name" /></li></ul>
+              <p class="muted small">{{ c.license }}</p>
+              <button type="button" class="btn" @click="removeCredit(i)">Remove this credit</button>
+            </div>
+          </div>
+
           <dl class="media-files">
             <div>
               <dt>Vertical video <span class="badge you">you add</span></dt>
@@ -502,11 +536,13 @@ onMounted(async () => {
                   <span class="who">Male (m)</span>
                   <CopyText :text="mediaM.video_vertical" what="file name" />
                   <span v-if="have(mediaM.video_vertical)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaM.video_vertical)" class="have">by {{ creditOf(mediaM.video_vertical)?.author }}</span>
                 </li>
                 <li>
                   <span class="who">Female (f)</span>
                   <CopyText :text="mediaF.video_vertical" what="file name" />
                   <span v-if="have(mediaF.video_vertical)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaF.video_vertical)" class="have">by {{ creditOf(mediaF.video_vertical)?.author }}</span>
                 </li>
                 </ul>
               </dd>
@@ -520,11 +556,13 @@ onMounted(async () => {
                   <span class="who">Male (m)</span>
                   <CopyText :text="mediaM.video_horizontal" what="file name" />
                   <span v-if="have(mediaM.video_horizontal)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaM.video_horizontal)" class="have">by {{ creditOf(mediaM.video_horizontal)?.author }}</span>
                 </li>
                 <li>
                   <span class="who">Female (f)</span>
                   <CopyText :text="mediaF.video_horizontal" what="file name" />
                   <span v-if="have(mediaF.video_horizontal)" class="have">✓ in library</span>
+                  <span v-if="creditOf(mediaF.video_horizontal)" class="have">by {{ creditOf(mediaF.video_horizontal)?.author }}</span>
                 </li>
                 </ul>
               </dd>
@@ -593,6 +631,32 @@ onMounted(async () => {
             See the <a :href="withBase('/guide/contributing')">contributing guide</a> and the
             <a :href="withBase('/guide/media')">media standards</a>.
           </p>
+        </section>
+
+        <section id="youtube">
+          <h2>8. YouTube link <span class="muted small">(optional)</span></h2>
+          <p>
+            Link a YouTube video that shows this exercise. The site and the apps play it from the start time you give, so a long video
+            can point at just the minute that matters. Only link videos you have the right to link; the link is shown as the credit.
+          </p>
+          <label class="field">
+            <span>YouTube address</span>
+            <input v-model="form.youtube.url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span>Starts at</span>
+              <input v-model="form.youtube.start" type="text" placeholder="1:02" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Stops at</span>
+              <input v-model="form.youtube.end" type="text" placeholder="2:01" autocomplete="off" />
+            </label>
+          </div>
+          <p v-if="storedLink" class="muted small">
+            {{ linkClip }} Stored in <code>exercise.json</code> as one link: <CopyText :text="storedLink" what="link" />
+          </p>
+          <p v-else class="muted small">Times are optional. Write them as 1:02 or 62 seconds.</p>
         </section>
 
         <section>
@@ -1133,5 +1197,24 @@ textarea:focus {
   background: rgb(245 184 61 / 20%);
   border-color: #9a6b00;
   color: #9a6b00;
+}
+.credits {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg-soft);
+}
+.credits h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+.credit p {
+  margin: 4px 0;
+}
+.credit + .credit {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vp-c-divider);
 }
 </style>

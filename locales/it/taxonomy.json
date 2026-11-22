@@ -1,0 +1,116 @@
+{
+  "muscle": {
+    "abdominals": "Addominali",
+    "abductors": "Abduttori",
+    "adductors": "Adduttori",
+    "biceps": "Bicipiti",
+    "calves": "Polpacci",
+    "chest": "Petto",
+    "forearms": "Avambracci",
+    "glutes": "Glutei",
+    "hamstrings": "Femorali",
+    "lats": "Dorsali",
+    "lower back": "Zona lombare",
+    "middle back": "Parte centrale della schiena",
+    "neck": "Collo",
+    "quadriceps": "Quadricipiti",
+    "shoulders": "Spalle",
+    "traps": "Trapezi",
+    "triceps": "Tricipiti"
+  },
+  "equipment": {
+    "barbell": "Bilanciere",
+    "dumbbell": "Manubrio",
+    "kettlebells": "Kettlebell",
+    "cable": "Cavo",
+    "machine": "Macchina",
+    "bands": "Elastici",
+    "body only": "Corpo libero",
+    "medicine ball": "Palla medica",
+    "exercise ball": "Palla da ginnastica",
+    "foam roll": "Foam roller",
+    "e-z curl bar": "Barra EZ",
+    "other": "Altro"
+  },
+  "level": {
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "expert": "Esperto"
+  },
+  "mechanic": {
+    "compound": "Composto",
+    "isolation": "Isolamento"
+  },
+  "force": {
+    "push": "Spinta",
+    "pull": "Trazione",
+    "static": "Statico",
+    "isometric": "Isometrico",
+    "crush": "Schiacciamento"
+  },
+  "category": {
+    "strength": "Forza",
+    "cardio": "Cardio",
+    "powerlifting": "Sollevamento pesi",
+    "olympic weightlifting": "Sollevamento pesi olimpico",
+    "strongman": "Uomo forte",
+    "plyometrics": "Pliometria",
+    "stretching": "Allungamento",
+    "back": "Indietro",
+    "chest": "Petto",
+    "shoulders": "Spalle",
+    "neck": "Collo",
+    "waist": "Vita",
+    "upper arms": "Parte superiore delle braccia",
+    "lower arms": "Parte inferiore delle braccia",
+    "upper legs": "Parte superiore delle gambe",
+    "lower legs": "Parte inferiore delle gambe",
+    "mobility": "Mobilità"
+  },
+  "body_part": {
+    "abdominals": "Addominali",
+    "abductors": "Abduttori",
+    "calves": "Polpacci",
+    "chest": "Petto",
+    "forearms": "Avambracci",
+    "glutes": "Glutei",
+    "hamstrings": "Femorali",
+    "lower back": "Zona lombare",
+    "middle back": "Parte centrale della schiena",
+    "neck": "Collo",
+    "shoulders": "Spalle",
+    "back": "Indietro",
+    "cardio": "Cardio",
+    "general": "Generale",
+    "hips": "Fianchi",
+    "waist": "Vita",
+    "quads": "Quadricipiti",
+    "upper back": "Parte alta della schiena",
+    "thighs": "Cosce",
+    "upper arms": "Parte superiore delle braccia",
+    "lower arms": "Parte inferiore delle braccia",
+    "upper legs": "Parte superiore delle gambe",
+    "lower legs": "Parte inferiore delle gambe"
+  },
+  "modality": {
+    "weight_reps": "Peso e ripetizioni",
+    "reps_only": "Solo ripetizioni",
+    "bodyweight_reps": "Ripetizioni a corpo libero",
+    "weight_duration": "Peso e durata",
+    "weight_distance": "Peso e distanza",
+    "duration": "Durata",
+    "duration_distance": "Durata e distanza"
+  },
+  "laterality": {
+    "bilateral": "Bilaterale",
+    "unilateral_left": "Unilaterale sinistro",
+    "unilateral_right": "Unilaterale destro",
+    "alternating": "Alternato"
+  },
+  "movement_plane": {
+    "sagittal": "Sagittale",
+    "frontal": "Frontale",
+    "transverse": "Trasversale",
+    "multiplanar": "Multiplanare"
+  }
+}

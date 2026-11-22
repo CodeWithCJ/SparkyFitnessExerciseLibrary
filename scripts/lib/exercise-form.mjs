@@ -2,6 +2,7 @@
 // the field checks, and converting between an exercise and the generator's form state.
 // No file system or Node APIs, so it runs in the browser too.
 import { SLUG_PATTERN, SLUG_MAX_LENGTH } from './catalog-rules.mjs';
+import { parseYouTube, parseTime, formatTime, buildYouTubeUrl, validateYouTubeUrl } from './youtube.mjs';
 
 export const MECHANICS = ['compound', 'isolation'];
 export const FORCES = ['push', 'pull', 'static'];
@@ -67,6 +68,7 @@ export function validateExercise(exercise, ctx) {
       }
     });
   }
+  if (exercise.media?.youtube_url != null) errors.push(...validateYouTubeUrl(exercise.media.youtube_url));
   return errors;
 }
 
@@ -89,6 +91,8 @@ export function emptyForm() {
     reps: 2,
     steps: [''],
     cues: [''],
+    youtube: { url: '', start: '', end: '' },
+    credits: [],
     rehab: { joint: '', conditions: [''], contraindications: [''], protocol: '' },
   };
 }
@@ -123,6 +127,8 @@ export function exerciseToForm(exercise) {
     reps: b.demonstration_reps ?? f.reps,
     steps: rows(exercise.steps),
     cues: rows(exercise.coaching_cues),
+    youtube: youtubeToForm(exercise.media?.youtube_url),
+    credits: (exercise.sources?.media ?? []).map((c) => ({ ...c, files: [...(c.files || [])] })),
     rehab: {
       joint: r.joint || '',
       conditions: rows(r.target_conditions),
@@ -174,7 +180,55 @@ export function applyForm(base, form) {
   };
   if (Object.keys(rehab).length) out.rehabilitation = rehab;
   else delete out.rehabilitation;
+
+  // Credits for media from elsewhere (sources.media) are kept unless the person removed them.
+  if (base.sources || form.credits.length) {
+    const sources = { ...(base.sources || {}) };
+    if (form.credits.length) sources.media = form.credits.map((c) => ({ ...c, files: [...c.files] }));
+    else delete sources.media;
+    if (Object.keys(sources).length) out.sources = sources;
+    else delete out.sources;
+  }
+
+  const link = youtubeFromForm(form.youtube);
+
+  const media = { ...(base.media || {}) };
+  if (link) media.youtube_url = link;
+  else delete media.youtube_url;
+  if (Object.keys(media).length) out.media = media;
+  else delete out.media;
   return out;
+}
+
+/** The form's three boxes for a stored link: the pasted address, and the start and end as m:ss. */
+function youtubeToForm(link) {
+  const parsed = link ? parseYouTube(link) : null;
+  if (!parsed) return { url: link || '', start: '', end: '' };
+  return { url: `https://youtu.be/${parsed.id}`, start: parsed.start != null ? formatTime(parsed.start) : '', end: parsed.end != null ? formatTime(parsed.end) : '' };
+}
+
+/**
+ * The one address to store. A time typed in the start or end box wins over a time inside the pasted
+ * address. Returns '' when there is no usable link (youtubeProblems says why).
+ */
+function youtubeFromForm(youtube) {
+  const parsed = parseYouTube(youtube.url);
+  if (!parsed) return '';
+  const start = parseTime(youtube.start) ?? parsed.start;
+  const end = parseTime(youtube.end) ?? parsed.end;
+  return buildYouTubeUrl({ id: parsed.id, start, end });
+}
+
+/** Problems in the YouTube boxes that applyForm would otherwise drop without saying so. */
+export function youtubeProblems(form) {
+  const y = form.youtube;
+  const problems = [];
+  if (!y.url.trim()) return problems;
+  if (!parseYouTube(y.url)) return ['The video link is not a YouTube address.'];
+  for (const [label, value] of [['start', y.start], ['end', y.end]]) {
+    if (value.trim() && parseTime(value) == null) problems.push(`The ${label} time '${value}' is not a time. Use 1:02 or 62.`);
+  }
+  return problems;
 }
 
 /** The text of exercise.json: 2-space indent and a trailing newline, like the files in the repo. */

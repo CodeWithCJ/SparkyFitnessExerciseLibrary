@@ -179,6 +179,16 @@ Media files are **auto-discovered by filename convention** inside each exercise 
 - **Duration:** 5 to 15 seconds (shows 1–2 complete repetitions)
 - **Metadata:** `pnpm media` writes the exercise ID, name, model and license into each MP4's title, comment and copyright tags, so a video can still be identified if it is renamed or copied out of its folder
 
+### Linking a YouTube video (optional)
+
+Besides our own files, an exercise can link one YouTube video in its `media` block. The link is a single address that carries the whole clip, so nothing else has to be kept in sync:
+
+```json
+"media": { "youtube_url": "https://youtu.be/dQw4w9WgXcQ?t=62&end=121" }
+```
+
+`t` is where the exercise starts and `end` is where it stops, in seconds, so this plays 1:02 to 2:01 of a longer video. A plain browser only honours the start; the browse site and the apps read both. Only link videos you have the right to link, and the owner must allow embedding. The [exercise generator](https://codewithcj.github.io/SparkyFitnessExerciseLibrary/contribute) builds the link from a pasted address and start and end times. In `dist/exercises.json` the link is published as `media.youtube_url`, with its parts in `media.youtube` (`id`, `start`, `end`).
+
 ## Media Optimization CLI
 
 Whenever you add or update raw video files, run the automated media optimizer:
@@ -194,7 +204,7 @@ pnpm media candidates sf-core-oth-0002
 pnpm media force-all
 ```
 
-*(If you wish to specify an exact timestamp for the thumbnail in `exercise.json`, you can optionally add `"media": { "thumbnail_timestamp": 3.0 }`).*
+*(To choose the thumbnail frame yourself, add `"media": { "thumbnail_timestamp": 3.0 }` to `exercise.json`. It is the only thing the `media` block can hold. It applies when the thumbnail is created, so to change an existing thumbnail, delete `<folder>_<m|f>_thumb.webp` and run `pnpm media` again.)*
 
 ## Taxonomy Reference
 
@@ -207,9 +217,9 @@ pnpm media force-all
 * **Muscles (`primary_muscles` / `secondary_muscles`):**  
   `abdominals` · `abductors` · `adductors` · `biceps` · `calves` · `chest` · `forearms` · `glutes` · `hamstrings` · `lats` · `lower back` · `middle back` · `neck` · `quadriceps` · `shoulders` · `traps` · `triceps`
 * **Mechanic & Force:**  
-  `mechanic`: `compound` · `isolation` · `other`  
-  `force`: `push` · `pull` · `static` · `other`  
-  `level`: `beginner` · `intermediate` · `advanced`
+  `mechanic`: `compound` · `isolation` (or empty)  
+  `force`: `push` · `pull` · `static` (or empty)  
+  `level`: `beginner` · `intermediate` · `expert`
 
 *(See the `taxonomy/` folder for complete schema definitions).*
 
@@ -279,7 +289,7 @@ Every exercise gets a catalog ID of the form **`sf-<body>-<equip>-<number>`**, a
   # Preview candidate thumbnail frames to pick the best action frame timestamp:
   pnpm media candidates sf-core-oth-0002
   ```
-  *This automatically compresses videos to ≤ 1.5 MB, mutes audio (`-an`), adds `+faststart`, and generates:*
+  *This re-encodes any video over 1.5 MB (the 2.5 MB cap is a hard limit), mutes audio (`-an`), adds `+faststart`, and generates:*
   * `<folder>_m_thumb.webp`: Lightweight static card thumbnail (360x640 / 640x360, ~15–25 KB).
   * `<folder>_m_9_16.webp` / `<folder>_m_16_9.webp`: Full-duration animated WebP preview loops (~160–460 KB) with 24-bit true color for smooth mobile & web playback and compact offline caching.
 
@@ -323,8 +333,12 @@ Each [release](https://github.com/CodeWithCJ/SparkyFitnessExerciseLibrary/releas
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). AI tools and developers: read [`AGENTS.md`](AGENTS.md) first.
 
+## Removal Requests
+
+If you hold rights to an image, video or text in this library, or you appear in one of the videos, and you want it removed, [open an issue](https://github.com/CodeWithCJ/SparkyFitnessExerciseLibrary/issues/new) titled "Removal request" with the exercise ID and file name, or message the maintainer ([@CodeWithCJ](https://github.com/CodeWithCJ)) on GitHub. We will take the media out of the repository and the next release. Media from other sources lists its source in `sources.media` in the exercise's `exercise.json`, so it can be found and removed quickly.
+
 ## License & Credits
 
 Free for personal, educational and other non-commercial use; commercial use needs written permission. This covers the exercise data, translations, images and videos as well as the code. The SparkyFitness name, logo and character are not licensed for branding your own work. See [`LICENSE`](LICENSE).
 
-Parts of the exercise data were adapted from open-source datasets under permissive licenses. The notices they require are in [`NOTICE.md`](NOTICE.md). No third-party media is included, and none may be added without a license.
+Parts of the exercise data were adapted from open-source datasets under permissive licenses. The notices they require are in [`NOTICE.md`](NOTICE.md). The only third-party media are the 25 exercise videos by [Your Move](https://ymove.app/free-exercise-videos), used under their free-video terms (commercial use with credit; not for resale or redistribution as a standalone video library). They stay under those terms, not this library's license, and each is credited in its exercise's `sources.media` and in `media.credits` of `dist/exercises.json`. Apps that show them must show the credit "Exercise video by Your Move". No other third-party media is included, and none may be added without a license.
