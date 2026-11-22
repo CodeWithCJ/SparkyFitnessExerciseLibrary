@@ -1,0 +1,40 @@
+version: 2
+updates:
+  # Action versions used by the workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    labels: [dependencies]
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      actions:
+        patterns: ['*']
+
+  # Browse site (VitePress, Vue).
+  - package-ecosystem: npm
+    directory: /docs
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    labels: [dependencies]
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      site:
+        patterns: ['*']
+
+  # Media tooling (sharp).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    labels: [dependencies]
+    commit-message:
+      prefix: 'chore(deps)'

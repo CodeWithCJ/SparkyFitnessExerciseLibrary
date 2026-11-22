@@ -306,6 +306,12 @@ pnpm docs:build          # Builds the browse site into docs/.vitepress/dist
 
 SparkyFitness imports `dist/exercises.json` from a tagged release of this repository. Apps should pin a release tag rather than read `main`, and key exercises by their `id`, which never changes. `folder` gives the exercise's directory, and every media path is relative to the repository root.
 
+Each [release](https://github.com/CodeWithCJ/SparkyFitnessExerciseLibrary/releases) carries `exercises.json` (the catalog), `locales.zip` (all translations), the `LICENSE` and `NOTICE.md` that must travel with them, and `SHA256SUMS.txt`. Versions follow the effect on apps: **major** for ID or schema changes, **minor** for new exercises, media or fields, **patch** for fixes.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). AI tools and developers: read [`AGENTS.md`](AGENTS.md) first.
+
 ## License & Credits
 
 Free for personal, educational and other non-commercial use; commercial use needs written permission. This covers the exercise data, translations, images and videos as well as the code. The SparkyFitness name, logo and character are not licensed for branding your own work. See [`LICENSE`](LICENSE).
