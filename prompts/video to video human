@@ -1,0 +1,225 @@
+# REALISTIC HUMAN — UNIVERSAL VIDEO-TO-VIDEO EXERCISE TRANSFORMATION (WHITE STUDIO)
+
+## OBJECTIVE
+
+Transform the supplied original exercise demonstration video into a premium, photorealistic exercise demonstration video featuring the supplied real human reference person in a clean, white, professional studio.
+
+This is a VIDEO-TO-VIDEO TRANSFORMATION task, NOT a new exercise generation task.
+
+Preserve the original exercise demonstration exactly while transforming its visual appearance using the supplied realistic human reference and a white studio environment.
+
+The original video is the single source of truth for all exercise biomechanics, posture, and movements.
+
+## 1. INPUT REFERENCES
+
+You will receive:
+
+1. ORIGINAL EXERCISE VIDEO
+   - Authoritative source for exercise movements, technique, timing, repetitions, and body positioning.
+
+2. REALISTIC HUMAN REFERENCE IMAGE(S)
+   - One or more photographs of the real person to be used as the demonstrator (front, back, left, and right views if available; otherwise at least one clear, well-lit full-body image plus a clear face image).
+   - Use these images to preserve the exact same person identity, face, and body consistency across all frames.
+
+There is no gym background, no animated or stylized character, and no logo reference. The environment is generated as a plain white studio (see Section 5).
+
+## 2. STRICT VIDEO-TO-VIDEO MOVEMENT PRESERVATION
+
+Preserve the original exercise video as closely as possible.
+
+Do not redesign, reinterpret, improve, or modify the exercise.
+
+Maintain:
+
+- Exact exercise type.
+- Original starting position and setup.
+- Original body positioning and joint angles.
+- Original equipment and equipment placement.
+- Original hand grip (overhand, underhand, neutral, hook, false).
+- Original foot positioning and stance width.
+- Original movement trajectory and path.
+- Original full range of motion.
+- Original repetitions.
+- Original movement speed, cadence, and timing.
+- Original pauses, holds, and transitions.
+- Original exercise sequence.
+- Original posture and technique.
+
+Movement & Physics Integrity:
+
+- The generated person must perform the same movements as the original demonstrator, frame by frame.
+- Equipment rigidity & physics: Barbells, dumbbells, cables, pulleys, handles, benches, and machines must remain completely rigid and interact with solid physical contact against hands and body without clipping, warping, melting, or dissolving.
+- Inpainting behind clothing: Reconstruct the bare anatomy and solid equipment surfaces cleanly where original clothing occluded body contact with equipment, cables, or benches.
+- Do not introduce new movements, repetitions, incorrect positions, posture corrections, or additional demonstrations.
+- Do not add an introductory mistake or correction sequence.
+- Do not change standing exercises into seated exercises, or vice versa.
+
+The original video must remain the movement reference throughout the entire transformation.
+
+## 3. HUMAN REPLACEMENT
+
+Replace the original demonstrator with the real human from the supplied reference image(s).
+
+Preserve:
+
+- Exact face and facial identity.
+- Hairstyle.
+- Skin tone and natural skin texture (pores, subtle imperfections, realistic sheen).
+- Body proportions and physique as shown in the reference.
+- Realistic anatomical definition.
+- Consistent identity across all frames.
+
+Appearance:
+
+- Plain, fitted athletic clothing suited to the reference (default: shirtless with plain dark athletic training shorts for male; athletic sports bra with plain dark shorts for female), so muscle activation remains clearly visible. Follow the clothing in the reference image if the user specifies it.
+- Realistic human anatomy; clearly visible muscle separation appropriate to the person's physique.
+- No logos, text, or branding on clothing or equipment.
+- No unnecessary accessories, wristbands, or jewelry unless present as required lifting equipment (e.g. lifting straps) in the source video.
+
+Match the original demonstrator's body position, movement, and orientation as closely as possible. Do not change the person's facial features or physique between frames. Output must look like live-action footage of a real person, not an animation, 3D render, or cartoon.
+
+## 4. MUSCLE ACTIVATION HIGHLIGHTING
+
+Identify the muscles genuinely involved in the exercise and highlight them using universal visual color coding:
+
+- RED / ORANGE: Primary target muscles (prime movers).
+- YELLOW: Secondary muscles (synergists / assistance).
+- BLUE: Supporting and stabilizing muscles (fixators / core).
+- NATURAL SKIN TONE: All other non-targeted muscles.
+
+Overlay & Shader Requirements:
+
+- Internal luminescence style: Highlights must appear as a subtle, translucent internal chromatic luminescence / glow beneath the skin surface, following actual anatomical muscle boundaries and muscle bellies, while keeping the real skin texture visible.
+- Zero color spill: Highlights must stay strictly confined to targeted muscle tissue, with no color bleeding, halos, or chromatic aberration onto neutral skin, joints, shorts, floor, equipment, or the white background.
+- Follow actual anatomical muscle boundaries and insertion points.
+- Keep highlights locked to the correct muscles throughout contraction, elongation, and movement.
+- Make highlights clearly visible without obscuring underlying muscle definition or skin texture.
+- Reflect muscle engagement dynamically throughout the exercise repetition.
+- Show bilateral (both sides) activation when appropriate.
+- Do not highlight unrelated muscles.
+
+Side-Specific & Active-Only Highlighting:
+
+- The color highlight must clearly show that the muscle is being worked right now. Muscles light up only while they are actively performing the movement and return to natural skin tone when they are not working.
+- Highlight only the body part, and the side of the body, that actually performs the work. For unilateral or alternating exercises (e.g. a single-arm dumbbell curl with the right arm, a one-arm row, a single-leg movement, alternating lunges), highlight only the working side. The idle or resting side stays in natural skin tone for the entire time it is not working.
+- When the working side alternates (left, then right), the highlight must switch sides in sync with the movement. Only the side that is performing at that moment is lit.
+- For bilateral exercises where both sides work together (e.g. barbell bench press, squat, deadlift), highlight both sides at the same time.
+- Highlight intensity follows the effort of the movement: brightest during the active contraction (the lifting or working phase), softer during the lowering or eccentric phase, and faded or off during rest or when the muscle is not engaged.
+- Never highlight a muscle or side that is merely stationary, relaxed, or not contributing to the current movement.
+- Do not display muscle names, written anatomical labels, or language-specific text.
+
+The video must communicate muscle activation visually and intuitively for users worldwide.
+
+## 5. WHITE PROFESSIONAL STUDIO ENVIRONMENT
+
+Replace the original background entirely with a clean, white, professional photo/video studio.
+
+Environment requirements:
+
+- Seamless pure white (or very light white) studio backdrop with a smooth cyclorama-style transition between wall and floor (no visible horizon line, seams, corners, or edges).
+- White or very light neutral floor with a subtle, soft reflection or none.
+- Bright, soft, even, professional studio lighting (large softbox / diffused key light with gentle fill), giving clean, flattering light on the person and equipment.
+- Soft, natural contact shadows beneath the person and equipment so they sit realistically on the floor; no harsh or distracting shadows on the backdrop.
+- No gym interior, no background equipment, no props, no windows, no furniture, no decorations, and no other people.
+- Only the equipment required by the original exercise appears in the scene, in clean neutral finishes (black, gray, or chrome), matching the original equipment type and placement.
+- Maintain the same white studio look consistently throughout every frame.
+- Natural, shallow depth of field is not needed; keep the subject sharp against the clean backdrop.
+
+Branding:
+
+- No logos, brand marks, watermarks, or signage anywhere in the scene, on the backdrop, clothing, or equipment.
+
+## 6. CAMERA, FRAMING & ASPECT RATIO ADAPTATION
+
+- Supported Aspect Ratios: Both **9:16 Vertical (`720 × 1280` or `1080 × 1920`)** and **16:9 Horizontal (`1280 × 720` or `720 × 404`)**, as well as **1:1 Square (`1080 × 1080`)**.
+- Intelligent Aspect Ratio Selection (Unless a specific ratio is explicitly requested):
+  - **Choose 9:16 Vertical (`720 × 1280`) by default for tall, vertical movements:**
+    - Exercises with primary vertical travel: Squats, Deadlifts, Overhead / Military Press, Pull-ups, Chin-ups, Standing Bicep Curls, Lunges, Calf Raises, Lat Pulldowns.
+    - Captures the complete head-to-toe movement naturally without wasting empty horizontal side space.
+  - **Choose 16:9 Horizontal (`1280 × 720`) by default for wide, horizontal, or bench movements:**
+    - Exercises with wide equipment or horizontal body orientation: Barbell Bench Press (fits the full 7.2-foot Olympic barbell and weight plates), Incline / Decline Bench, Push-ups, Floor Planks, Ab Wheel Rollouts, Cable Chest Flyes, Rowing Machines.
+    - Avoids clipping barbell collars or pulling the camera back so far that the demonstrator's body appears tiny.
+  - **Explicit User Request Precedence:** If the user or specification explicitly requests a specific aspect ratio (or requests both vertical and horizontal versions), generate the requested ratio(s).
+- Dynamic Reframing & Centering: When adapting from horizontal (16:9) or wide source footage, dynamically reframe and center the subject so the demonstrator's entire body, full range of motion, and complete equipment trajectory (e.g. lockout of an overhead press, bottom of a squat or deadlift) remain fully visible inside the frame with adequate headroom and floor margins.
+- Do not crop out limbs, hands, feet, weights, or equipment at the edges of the frame.
+- Full-Body Coverage Is Mandatory: The complete body, from head to toes, plus all equipment must be visible in every frame, from the first frame to the last. Never cut off the head, hands, feet, or any working body part, and never leave the person partly out of frame at any point in the repetition.
+- Camera Angle Selection: Choose the camera angle that best shows the exercise and the working muscles (front, side profile, rear, or three-quarter view; eye-level or slightly elevated). The angle does not have to match the original footage if another angle shows the movement and the targeted muscles more clearly. The person's movement, technique, and equipment must still match the original exactly; only the viewpoint may change.
+  - Use a side or three-quarter view for movements where depth matters (e.g. squats, deadlifts, curls, presses, rows, lunges), and a front or rear view where width or symmetry matters (e.g. lateral raises, flyes, pull-ups).
+  - Use an elevated or three-quarter angle for floor and bench exercises (e.g. push-ups, planks, bench press) so the whole body and the equipment are visible.
+  - Pull the camera back or reframe as needed so the full range of motion, including the top and bottom of the repetition, stays fully inside the frame with margin on all sides.
+  - Once an angle is chosen, keep it fixed for the whole clip: no cuts, no switching between angles, and no sudden perspective changes. Any adjustment must be a very slow, subtle reframe used only to keep the whole body in view.
+- Source Footage Integrity Fallback: Source footage must include the full demonstrator body, equipment, and range-of-motion endpoints. If the source video itself has cropped-out limbs, hands, feet, or weights, do not hallucinate or invent the missing anatomy or equipment; flag the video for re-capture or manual replacement.
+- Keep the entire relevant exercise movement centered and visible.
+- Avoid camera cuts or perspective switching during the clip (the camera angle is chosen once, as described above).
+- Avoid excessive zooming, shaking, or fast camera panning.
+- Use subtle camera adjustments only if necessary to maintain full subject visibility.
+- Prioritize exercise clarity and biomechanical visibility over cinematic effects.
+
+## 7. VIDEO OUTPUT & SEAMLESS LOOPING
+
+- Duration: 5 to 15 seconds total.
+- Repetition Cycle: 1–2 complete, clean repetitions (shows full controlled movement or alternating sides).
+- File Naming:
+  - Vertical (9:16): Save as `{{NUMERIC_ID}}_{{SLUG}}_9_16.mp4` (or `{{NUMERIC_ID}}_{{SLUG}}.mp4` if only one orientation is generated).
+  - Horizontal (16:9): Save as `{{NUMERIC_ID}}_{{SLUG}}_16_9.mp4`.
+  - Square (1:1): Save as `{{NUMERIC_ID}}_{{SLUG}}_1_1.mp4` (or configure explicit `video_path` in `exercise.json` when published alongside other orientations).
+- Target File Size: ~0.5 MB to 1.5 MB (max 2.5 MB), encoded with H.264 (libx264).
+- Seamless In-App Looping & Continuous Movement Flow:
+  - The video must start and end at the exact same neutral setup / resting point of the movement cycle so infinite playback creates the seamless illusion of one ongoing workout set.
+  - When the repetition completes, it must flow smoothly and naturally back into the start of the next repetition rather than abruptly cutting off, stopping, or looking like the exercise was aborted and restarted from scratch.
+  - Body posture, joint angles, limb positioning, and return momentum at the final frame must align continuously with the initial frame without hitches, jumps, or jarring resets.
+- Aspect Ratio: Match the chosen format (9:16 vertical, 16:9 horizontal, or 1:1 square).
+- Style: Photorealistic live-action look of a real human (not animated, not stylized, not 3D-cartoon).
+- Movement: Faithfully reproduced from the original video.
+- Motion Pacing: Preserve the natural cadence and tempo of the repetition. Never unnaturally speed up, slow down, or freeze movement to force an arbitrary duration.
+- Conflict Precedence Rule: Preserving the original movement technique, repetitions, and natural cadence (Section 2 & Motion Pacing) always takes precedence over arbitrary duration limits. If source footage cannot satisfy both (e.g. slower tempo or longer set), keep the complete original movement intact without speed-warping, and flag the clip for human trimming.
+- Character: Consistent real human from the reference image(s).
+- Environment: Consistent white professional studio.
+- Muscle Highlighting: Anatomically accurate color-coded overlays.
+- Text: No language-specific text, overlays, or watermarks.
+
+## 8. AUDIO
+
+- Silent video output (no audio track, or muted via `-an`) to optimize for smooth mobile in-app looping and keep file sizes within the target threshold (~0.5 MB to 1.5 MB, max 2.5 MB).
+- No voiceover, music, narration, or sound effects.
+
+## 9. STRICT NEGATIVE INSTRUCTIONS
+
+DO NOT:
+
+- Invent new exercise movements or variations.
+- Correct, alter, or modify the original demonstrator's posture or technique.
+- Add incorrect-versus-correct demonstration sequences.
+- Change equipment, grip width, or foot stance.
+- Allow equipment to float, deform, or clip through the body or limbs.
+- Produce color bleeding or chromatic halos from muscle overlays onto equipment or background.
+- Crop out hands, feet, weights, or range-of-motion endpoints.
+- Unnaturally speed up, slow down, or freeze motion phases.
+- Abruptly cut, abort, drop weights, or break posture at the end of the clip so it jolts or looks restarted rather than continuing.
+- Alter the person's facial identity or body proportions across frames.
+- Generate distorted anatomy, extra limbs, or deformed fingers.
+- Make the person look animated, cartoonish, plastic, airbrushed, waxy, or like a 3D render, mannequin, or AI-generated figure; the person must look like a real human.
+- Highlight the wrong muscle or body part, such as muscles that are not involved in the exercise.
+- Highlight the wrong side of the body, such as lighting up the left arm when only the right arm is working.
+- Keep a muscle highlighted when it is not working, or leave a working muscle un-highlighted.
+- Let highlight colors drift, flicker, jump between muscles, or spill onto skin, clothing, equipment, floor, or backdrop.
+- Use the wrong color for a muscle's role (primary red/orange, secondary yellow, stabilizer blue).
+- Cut off, crop, or partially hide the head, hands, feet, limbs, weights, or equipment at any point in the clip.
+- Let the person walk or move out of frame, or let the camera follow so loosely that part of the body leaves the frame.
+- Change camera angle, zoom, or position in the middle of the clip, or add cuts or transitions.
+- Show the body in an anatomically impossible pose, with joints bending the wrong way, twisted limbs, floating or sliding feet, or feet that do not stay planted on the floor.
+- Change the person's size, proportions, skin tone, or face between frames.
+- Add blur, ghosting, motion smear, flicker, or morphing on the body, hands, face, or equipment.
+- Make the person look at the camera, smile, pose, or perform for the camera unless the original video does so.
+- Add extra people, reflections of other people, or any object in the background.
+- Add a gym environment, background equipment, props, colored backdrops, gradients, or textured walls.
+- Add any logo, brand mark, watermark, text, subtitles, muscle names, or countdown timers.
+- Add music, narration, or synthetic voiceover.
+
+## FINAL REQUIREMENT
+
+The final video must look like the original exercise demonstration was professionally filmed using the supplied real human in a clean white photography studio.
+
+**Change the person, environment, and muscle highlighting. Preserve the original exercise movement.**
+
+This is a faithful video-to-video transformation, not an exercise redesign.
