@@ -20,9 +20,9 @@ Demonstrations generated with the SparkyFitness character and gym. Muscle highli
       <a href="exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_9_16.mp4?raw=true">9:16 MP4</a> · <a href="exercises/sf-core-oth-0002_ab_wheel_rollout/sf-core-oth-0002_ab_wheel_rollout_m_16_9.mp4?raw=true">16:9 MP4</a>
     </td>
     <td align="center">
-      <a href="exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.mp4?raw=true"><img src="exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.webp" width="240" alt="Band squat demonstration" /></a><br />
-      <b>Band Squat</b><br />
-      <a href="exercises/sf-legs-bnd-0010_squat_band/sf-legs-bnd-0010_squat_band_m_9_16.mp4?raw=true">MP4</a>
+      <a href="exercises/sf-arms-db-0004_dumbbell_concentration_curl/sf-arms-db-0004_dumbbell_concentration_curl_m_9_16.mp4?raw=true"><img src="exercises/sf-arms-db-0004_dumbbell_concentration_curl/sf-arms-db-0004_dumbbell_concentration_curl_m_9_16.webp" width="240" alt="Dumbbell concentration curl demonstration" /></a><br />
+      <b>Dumbbell Concentration Curl</b><br />
+      <a href="exercises/sf-arms-db-0004_dumbbell_concentration_curl/sf-arms-db-0004_dumbbell_concentration_curl_m_9_16.mp4?raw=true">MP4</a>
     </td>
   </tr>
 </table>
